@@ -288,8 +288,8 @@ impl Default for LoadBalancerConfig {
 
 impl Config {
     pub fn load() -> anyhow::Result<Self> {
-        let config_path = std::env::var("IRONFISH_CONFIG")
-            .unwrap_or_else(|_| "config/default.toml".to_string());
+        let config_path =
+            std::env::var("IRONFISH_CONFIG").unwrap_or_else(|_| "config/default.toml".to_string());
 
         if std::path::Path::new(&config_path).exists() {
             let content = std::fs::read_to_string(&config_path)?;

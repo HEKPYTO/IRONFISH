@@ -16,13 +16,8 @@ pub enum AdminCommands {
 
 #[derive(Subcommand)]
 pub enum ConfigCommands {
-    Get {
-        key: String,
-    },
-    Set {
-        key: String,
-        value: String,
-    },
+    Get { key: String },
+    Set { key: String, value: String },
 }
 
 #[derive(Debug, Deserialize)]

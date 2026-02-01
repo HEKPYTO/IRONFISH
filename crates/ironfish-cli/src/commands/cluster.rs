@@ -76,7 +76,10 @@ pub async fn execute(command: ClusterCommands, endpoint: &str) -> anyhow::Result
             let status: ClusterStatus = response.json().await?;
 
             println!("Cluster Status:");
-            println!("  Leader: {}", status.leader_id.unwrap_or_else(|| "none".into()));
+            println!(
+                "  Leader: {}",
+                status.leader_id.unwrap_or_else(|| "none".into())
+            );
             println!("  Term: {}", status.term);
             println!("  Healthy: {}", status.healthy);
             println!();

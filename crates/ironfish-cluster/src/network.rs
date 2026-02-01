@@ -67,13 +67,13 @@ impl NetworkService {
     }
 
     pub async fn start(&self) -> Result<()> {
-        let listener_addr = SocketAddr::new(
-            self.local_node.address.ip(),
-            self.gossip_port,
-        );
+        let listener_addr = SocketAddr::new(self.local_node.address.ip(), self.gossip_port);
 
         let listener = TcpListener::bind(listener_addr).await.map_err(|e| {
-            Error::Network(format!("failed to bind gossip port {}: {}", self.gossip_port, e))
+            Error::Network(format!(
+                "failed to bind gossip port {}: {}",
+                self.gossip_port, e
+            ))
         })?;
 
         info!("gossip network listening on {}", listener_addr);
@@ -125,16 +125,17 @@ impl NetworkService {
             return;
         }
         if !peers.contains_key(&peer.id) {
-            let gossip_addr = SocketAddr::new(
-                peer.address.ip(),
-                peer.address.port() + GOSSIP_PORT_OFFSET,
+            let gossip_addr =
+                SocketAddr::new(peer.address.ip(), peer.address.port() + GOSSIP_PORT_OFFSET);
+            peers.insert(
+                peer.id.clone(),
+                PeerConnection {
+                    info: peer.clone(),
+                    gossip_addr,
+                    healthy: true,
+                    last_seen: std::time::Instant::now(),
+                },
             );
-            peers.insert(peer.id.clone(), PeerConnection {
-                info: peer.clone(),
-                gossip_addr,
-                healthy: true,
-                last_seen: std::time::Instant::now(),
-            });
             info!("added peer {} at {}", peer.id, gossip_addr);
         }
     }
@@ -171,16 +172,21 @@ impl NetworkService {
         Ok(())
     }
 
-    pub async fn sync_with_peer(&self, peer_id: &NodeId, from_version: u64) -> Result<Vec<GossipEnvelope>> {
+    pub async fn sync_with_peer(
+        &self,
+        peer_id: &NodeId,
+        from_version: u64,
+    ) -> Result<Vec<GossipEnvelope>> {
         let peers = self.peers.read().await;
-        let conn = peers.get(peer_id).ok_or_else(|| {
-            Error::Network(format!("peer {} not found", peer_id))
-        })?;
+        let conn = peers
+            .get(peer_id)
+            .ok_or_else(|| Error::Network(format!("peer {} not found", peer_id)))?;
 
         let response = send_and_receive(
             conn.gossip_addr,
             NetworkMessage::SyncRequest { from_version },
-        ).await?;
+        )
+        .await?;
 
         match response {
             NetworkMessage::SyncResponse { entries } => Ok(entries),
@@ -190,14 +196,11 @@ impl NetworkService {
 
     pub async fn discover_from_peer(&self, peer_id: &NodeId) -> Result<Vec<NodeInfo>> {
         let peers = self.peers.read().await;
-        let conn = peers.get(peer_id).ok_or_else(|| {
-            Error::Network(format!("peer {} not found", peer_id))
-        })?;
+        let conn = peers
+            .get(peer_id)
+            .ok_or_else(|| Error::Network(format!("peer {} not found", peer_id)))?;
 
-        let response = send_and_receive(
-            conn.gossip_addr,
-            NetworkMessage::DiscoveryRequest,
-        ).await?;
+        let response = send_and_receive(conn.gossip_addr, NetworkMessage::DiscoveryRequest).await?;
 
         match response {
             NetworkMessage::DiscoveryResponse { nodes } => Ok(nodes),
@@ -215,7 +218,9 @@ impl NetworkService {
     }
 
     pub async fn healthy_peers(&self) -> Vec<NodeInfo> {
-        self.peers.read().await
+        self.peers
+            .read()
+            .await
             .values()
             .filter(|c| c.healthy)
             .map(|c| c.info.clone())
@@ -251,13 +256,13 @@ async fn handle_connection(
         }
 
         let mut buf = vec![0u8; len];
-        stream.read_exact(&mut buf).await.map_err(|e| {
-            Error::Network(format!("read error: {}", e))
-        })?;
+        stream
+            .read_exact(&mut buf)
+            .await
+            .map_err(|e| Error::Network(format!("read error: {}", e)))?;
 
-        let message: NetworkMessage = serde_json::from_slice(&buf).map_err(|e| {
-            Error::Network(format!("deserialize error: {}", e))
-        })?;
+        let message: NetworkMessage = serde_json::from_slice(&buf)
+            .map_err(|e| Error::Network(format!("deserialize error: {}", e)))?;
 
         match message {
             NetworkMessage::Gossip(envelope) => {
@@ -275,9 +280,7 @@ async fn handle_connection(
             }
             NetworkMessage::DiscoveryRequest => {
                 let peers_guard = peers.read().await;
-                let nodes: Vec<NodeInfo> = peers_guard.values()
-                    .map(|c| c.info.clone())
-                    .collect();
+                let nodes: Vec<NodeInfo> = peers_guard.values().map(|c| c.info.clone()).collect();
                 let response = NetworkMessage::DiscoveryResponse { nodes };
                 send_response(&mut stream, &response).await?;
             }
@@ -289,57 +292,59 @@ async fn handle_connection(
 }
 
 async fn send_response(stream: &mut TcpStream, message: &NetworkMessage) -> Result<()> {
-    let data = serde_json::to_vec(message).map_err(|e| {
-        Error::Network(format!("serialize error: {}", e))
-    })?;
+    let data = serde_json::to_vec(message)
+        .map_err(|e| Error::Network(format!("serialize error: {}", e)))?;
     let len = (data.len() as u32).to_be_bytes();
-    stream.write_all(&len).await.map_err(|e| {
-        Error::Network(format!("write error: {}", e))
-    })?;
-    stream.write_all(&data).await.map_err(|e| {
-        Error::Network(format!("write error: {}", e))
-    })?;
+    stream
+        .write_all(&len)
+        .await
+        .map_err(|e| Error::Network(format!("write error: {}", e)))?;
+    stream
+        .write_all(&data)
+        .await
+        .map_err(|e| Error::Network(format!("write error: {}", e)))?;
     Ok(())
 }
 
 async fn send_to_peer(addr: SocketAddr, message: NetworkMessage) -> Result<()> {
-    let mut stream = TcpStream::connect(addr).await.map_err(|e| {
-        Error::Network(format!("connect error: {}", e))
-    })?;
+    let mut stream = TcpStream::connect(addr)
+        .await
+        .map_err(|e| Error::Network(format!("connect error: {}", e)))?;
 
-    let data = serde_json::to_vec(&message).map_err(|e| {
-        Error::Network(format!("serialize error: {}", e))
-    })?;
+    let data = serde_json::to_vec(&message)
+        .map_err(|e| Error::Network(format!("serialize error: {}", e)))?;
 
     let len = (data.len() as u32).to_be_bytes();
-    stream.write_all(&len).await.map_err(|e| {
-        Error::Network(format!("write error: {}", e))
-    })?;
-    stream.write_all(&data).await.map_err(|e| {
-        Error::Network(format!("write error: {}", e))
-    })?;
+    stream
+        .write_all(&len)
+        .await
+        .map_err(|e| Error::Network(format!("write error: {}", e)))?;
+    stream
+        .write_all(&data)
+        .await
+        .map_err(|e| Error::Network(format!("write error: {}", e)))?;
 
     Ok(())
 }
 
 async fn send_and_receive(addr: SocketAddr, message: NetworkMessage) -> Result<NetworkMessage> {
-    let mut stream = tokio::time::timeout(
-        Duration::from_secs(5),
-        TcpStream::connect(addr),
-    ).await.map_err(|_| Error::Network("connection timeout".into()))?
-    .map_err(|e| Error::Network(format!("connect error: {}", e)))?;
+    let mut stream = tokio::time::timeout(Duration::from_secs(5), TcpStream::connect(addr))
+        .await
+        .map_err(|_| Error::Network("connection timeout".into()))?
+        .map_err(|e| Error::Network(format!("connect error: {}", e)))?;
 
-    let data = serde_json::to_vec(&message).map_err(|e| {
-        Error::Network(format!("serialize error: {}", e))
-    })?;
+    let data = serde_json::to_vec(&message)
+        .map_err(|e| Error::Network(format!("serialize error: {}", e)))?;
 
     let len = (data.len() as u32).to_be_bytes();
-    stream.write_all(&len).await.map_err(|e| {
-        Error::Network(format!("write error: {}", e))
-    })?;
-    stream.write_all(&data).await.map_err(|e| {
-        Error::Network(format!("write error: {}", e))
-    })?;
+    stream
+        .write_all(&len)
+        .await
+        .map_err(|e| Error::Network(format!("write error: {}", e)))?;
+    stream
+        .write_all(&data)
+        .await
+        .map_err(|e| Error::Network(format!("write error: {}", e)))?;
 
     let mut len_buf = [0u8; 4];
     tokio::time::timeout(Duration::from_secs(5), stream.read_exact(&mut len_buf))
@@ -353,11 +358,10 @@ async fn send_and_receive(addr: SocketAddr, message: NetworkMessage) -> Result<N
     }
 
     let mut buf = vec![0u8; response_len];
-    stream.read_exact(&mut buf).await.map_err(|e| {
-        Error::Network(format!("read error: {}", e))
-    })?;
+    stream
+        .read_exact(&mut buf)
+        .await
+        .map_err(|e| Error::Network(format!("read error: {}", e)))?;
 
-    serde_json::from_slice(&buf).map_err(|e| {
-        Error::Network(format!("deserialize error: {}", e))
-    })
+    serde_json::from_slice(&buf).map_err(|e| Error::Network(format!("deserialize error: {}", e)))
 }

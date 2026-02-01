@@ -70,22 +70,16 @@ impl EnginePool {
             .await
             .map_err(|_| Error::PoolExhausted)?;
 
-        loop {
-            let idx = self.next_engine.fetch_add(1, Ordering::SeqCst) % self.engines.len();
-            let engine = &self.engines[idx];
+        let idx = self.next_engine.fetch_add(1, Ordering::SeqCst) % self.engines.len();
+        let engine = Arc::clone(&self.engines[idx]);
 
-            if engine.send_command("isready").await.is_err() {
-                continue;
-            }
+        self.active_count.fetch_add(1, Ordering::SeqCst);
 
-            self.active_count.fetch_add(1, Ordering::SeqCst);
-
-            return Ok(PooledEngine {
-                engine: Arc::clone(engine),
-                permit,
-                pool: self,
-            });
-        }
+        Ok(PooledEngine {
+            engine,
+            permit,
+            pool: self,
+        })
     }
 
     pub fn available(&self) -> usize {

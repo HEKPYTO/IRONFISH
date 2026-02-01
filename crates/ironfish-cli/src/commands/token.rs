@@ -47,7 +47,10 @@ pub async fn execute(command: TokenCommands, endpoint: &str) -> anyhow::Result<(
     let client = reqwest::Client::new();
 
     match command {
-        TokenCommands::Create { name, expires_in_days } => {
+        TokenCommands::Create {
+            name,
+            expires_in_days,
+        } => {
             let url = format!("{}/_admin/tokens", endpoint);
             let body = serde_json::json!({
                 "name": name,

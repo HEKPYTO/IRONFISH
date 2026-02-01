@@ -33,7 +33,7 @@ impl GraphQLService {
             MutationRoot::default(),
             EmptySubscription,
         )
-        .data(self.state.clone()) 
+        .data(self.state.clone())
         .finish()
     }
 
@@ -46,17 +46,12 @@ impl GraphQLService {
     }
 }
 
-async fn graphql_handler(
-    State(schema): State<AppSchema>,
-    req: GraphQLRequest,
-) -> GraphQLResponse {
+async fn graphql_handler(State(schema): State<AppSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
 }
 
 async fn graphql_playground() -> impl axum::response::IntoResponse {
-    axum::response::Html(
-        async_graphql::http::playground_source(async_graphql::http::GraphQLPlaygroundConfig::new(
-            "/graphql",
-        )),
-    )
+    axum::response::Html(async_graphql::http::playground_source(
+        async_graphql::http::GraphQLPlaygroundConfig::new("/graphql"),
+    ))
 }

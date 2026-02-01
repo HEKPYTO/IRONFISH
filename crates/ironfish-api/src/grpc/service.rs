@@ -162,8 +162,7 @@ impl ChessAnalysis for ChessAnalysisHandler {
         }))
     }
 
-    type StreamAnalysisStream =
-        Pin<Box<dyn Stream<Item = Result<AnalysisUpdate, Status>> + Send>>;
+    type StreamAnalysisStream = Pin<Box<dyn Stream<Item = Result<AnalysisUpdate, Status>> + Send>>;
 
     async fn stream_analysis(
         &self,
@@ -247,7 +246,11 @@ impl ClusterAdmin for ClusterAdminHandler {
         Ok(Response::new(ProtoJoinResponse {
             accepted: result.accepted,
             leader_id: result.leader_id.map(|l| l.to_string()),
-            members: result.members.into_iter().map(|m| m.id.to_string()).collect(),
+            members: result
+                .members
+                .into_iter()
+                .map(|m| m.id.to_string())
+                .collect(),
             term: result.term,
         }))
     }

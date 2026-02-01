@@ -58,9 +58,7 @@ impl TestServer {
         };
 
         let temp_dir = tempfile::tempdir().expect("temp dir");
-        let token_store = Arc::new(
-            SledTokenStore::new(temp_dir.path()).expect("token store"),
-        );
+        let token_store = Arc::new(SledTokenStore::new(temp_dir.path()).expect("token store"));
 
         let secret = TokenManager::generate_secret();
         let token_manager = Arc::new(TokenManager::new(&secret, "test"));

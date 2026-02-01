@@ -115,17 +115,17 @@ impl GossipService {
         let key = Self::entry_key(&entry.message);
         let mut entries = self.entries.write().await;
 
-        if let Some(existing) = entries.get(&key) {
-            if existing.version > entry.version {
+        match entries.get(&key) {
+            Some(existing) if existing.version >= entry.version => {
                 return;
             }
-            if existing.version == entry.version && existing.origin >= entry.origin {
-                return;
-            }
+            _ => {}
         }
 
         entries.insert(key, entry.clone());
         let _ = self.broadcast_tx.send(entry.message.clone());
+
+        debug!("applied gossip message from {}", entry.origin);
     }
 }
 

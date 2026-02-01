@@ -1,5 +1,5 @@
-use serde_json::json;
 use crate::helpers::DockerCluster;
+use serde_json::json;
 
 const CLUSTER_ADMIN_KEY: &str = "cluster-admin-secret";
 
@@ -167,7 +167,9 @@ async fn test_cluster_graphql_across_nodes() {
         assert_eq!(resp.status(), 200);
 
         let result: serde_json::Value = resp.json().await.expect("json");
-        assert!(result["data"]["clusterStatus"]["healthy"].as_bool().unwrap_or(false));
+        assert!(result["data"]["clusterStatus"]["healthy"]
+            .as_bool()
+            .unwrap_or(false));
     }
 
     cluster.stop().await;

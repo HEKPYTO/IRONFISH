@@ -159,35 +159,69 @@ impl UciInfo {
         }
 
         let mut info = Self::default();
-        let mut tokens = line.split_whitespace().peekable();
-        
-        tokens.next(); 
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        let mut i = 1;
 
-        while let Some(token) = tokens.next() {
-            match token {
-                "depth" => info.depth = tokens.next().and_then(|s| s.parse().ok()),
-                "seldepth" => info.seldepth = tokens.next().and_then(|s| s.parse().ok()),
-                "multipv" => info.multipv = tokens.next().and_then(|s| s.parse().ok()),
+        while i < parts.len() {
+            match parts[i] {
+                "depth" => {
+                    i += 1;
+                    info.depth = parts.get(i).and_then(|s| s.parse().ok());
+                }
+                "seldepth" => {
+                    i += 1;
+                    info.seldepth = parts.get(i).and_then(|s| s.parse().ok());
+                }
+                "multipv" => {
+                    i += 1;
+                    info.multipv = parts.get(i).and_then(|s| s.parse().ok());
+                }
                 "score" => {
-                    match tokens.next() {
-                        Some("cp") => info.score_cp = tokens.next().and_then(|s| s.parse().ok()),
-                        Some("mate") => info.score_mate = tokens.next().and_then(|s| s.parse().ok()),
+                    i += 1;
+                    match parts.get(i) {
+                        Some(&"cp") => {
+                            i += 1;
+                            info.score_cp = parts.get(i).and_then(|s| s.parse().ok());
+                        }
+                        Some(&"mate") => {
+                            i += 1;
+                            info.score_mate = parts.get(i).and_then(|s| s.parse().ok());
+                        }
                         _ => {}
                     }
-                },
-                "nodes" => info.nodes = tokens.next().and_then(|s| s.parse().ok()),
-                "nps" => info.nps = tokens.next().and_then(|s| s.parse().ok()),
-                "time" => info.time = tokens.next().and_then(|s| s.parse().ok()),
-                "hashfull" => info.hashfull = tokens.next().and_then(|s| s.parse().ok()),
-                "currmove" => info.currmove = tokens.next().map(|s| s.to_string()),
+                }
+                "nodes" => {
+                    i += 1;
+                    info.nodes = parts.get(i).and_then(|s| s.parse().ok());
+                }
+                "nps" => {
+                    i += 1;
+                    info.nps = parts.get(i).and_then(|s| s.parse().ok());
+                }
+                "time" => {
+                    i += 1;
+                    info.time = parts.get(i).and_then(|s| s.parse().ok());
+                }
+                "hashfull" => {
+                    i += 1;
+                    info.hashfull = parts.get(i).and_then(|s| s.parse().ok());
+                }
+                "currmove" => {
+                    i += 1;
+                    info.currmove = parts.get(i).map(|s| s.to_string());
+                }
                 "pv" => {
-                    while let Some(mv) = tokens.next() {
-                        info.pv.push(mv.to_string());
+                    i += 1;
+                    while i < parts.len() {
+                        info.pv.push(parts[i].to_string());
+                        i += 1;
                     }
-                },
-                _ => {} 
+                }
+                _ => {}
             }
+            i += 1;
         }
+
         Some(info)
     }
 }

@@ -68,7 +68,10 @@ impl AnalysisService {
             return Ok(self.mock_analysis_result(&request));
         }
 
-        let pool = self.pool.as_ref().ok_or_else(|| Error::Engine("no pool".into()))?;
+        let pool = self
+            .pool
+            .as_ref()
+            .ok_or_else(|| Error::Engine("no pool".into()))?;
         let pooled = pool.acquire().await?;
         let engine = pooled.engine();
 
@@ -77,9 +80,12 @@ impl AnalysisService {
         engine.set_position(&request.fen).await?;
         engine.go_depth(request.depth).await?;
 
-        let result = timeout(self.analysis_timeout, self.collect_analysis(&request, engine))
-            .await
-            .map_err(|_| Error::AnalysisTimeout)??;
+        let result = timeout(
+            self.analysis_timeout,
+            self.collect_analysis(&request, engine),
+        )
+        .await
+        .map_err(|_| Error::AnalysisTimeout)??;
 
         Ok(result)
     }
@@ -168,7 +174,10 @@ impl AnalysisService {
             return Ok(self.mock_best_move_result());
         }
 
-        let pool = self.pool.as_ref().ok_or_else(|| Error::Engine("no pool".into()))?;
+        let pool = self
+            .pool
+            .as_ref()
+            .ok_or_else(|| Error::Engine("no pool".into()))?;
         let pooled = pool.acquire().await?;
         let engine = pooled.engine();
 
@@ -230,8 +239,16 @@ impl AnalysisService {
             principal_variations: vec![PrincipalVariation {
                 rank: 1,
                 moves: vec![
-                    Move { from: "e2".to_string(), to: "e4".to_string(), promotion: None },
-                    Move { from: "e7".to_string(), to: "e5".to_string(), promotion: None },
+                    Move {
+                        from: "e2".to_string(),
+                        to: "e4".to_string(),
+                        promotion: None,
+                    },
+                    Move {
+                        from: "e7".to_string(),
+                        to: "e5".to_string(),
+                        promotion: None,
+                    },
                 ],
                 evaluation: Evaluation::centipawns(30),
                 depth: request.depth,

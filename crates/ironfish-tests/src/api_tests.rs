@@ -1,5 +1,5 @@
-use serde_json::json;
 use crate::helpers::{TestServer, TEST_ADMIN_KEY};
+use serde_json::json;
 
 #[tokio::test]
 async fn test_health_endpoint() {
@@ -27,7 +27,10 @@ async fn test_analyze_endpoint_mock() {
 
     let result: serde_json::Value = resp.json().await.expect("json");
     assert!(result["id"].is_string());
-    assert_eq!(result["fen"], "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    assert_eq!(
+        result["fen"],
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    );
     assert!(result["best_move"].is_object());
     assert!(result["evaluation"].is_object());
 }

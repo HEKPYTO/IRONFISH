@@ -78,9 +78,9 @@ impl MulticastDiscovery {
         self.ensure_socket().await?;
 
         let socket_guard = self.socket.read().await;
-        let socket = socket_guard.as_ref().ok_or_else(|| {
-            Error::Discovery("socket not initialized".into())
-        })?;
+        let socket = socket_guard
+            .as_ref()
+            .ok_or_else(|| Error::Discovery("socket not initialized".into()))?;
 
         let mut packet = vec![msg_type];
         packet.extend_from_slice(data);
@@ -102,9 +102,9 @@ impl ClusterDiscovery for MulticastDiscovery {
         self.ensure_socket().await?;
 
         let socket_guard = self.socket.read().await;
-        let socket = socket_guard.as_ref().ok_or_else(|| {
-            Error::Discovery("socket not initialized".into())
-        })?;
+        let socket = socket_guard
+            .as_ref()
+            .ok_or_else(|| Error::Discovery("socket not initialized".into()))?;
 
         let mut nodes = Vec::new();
         let mut buf = vec![0u8; 1024];

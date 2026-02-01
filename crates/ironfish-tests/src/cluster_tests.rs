@@ -1,10 +1,9 @@
-use std::sync::Arc;
 use chrono::Utc;
+use std::sync::Arc;
 
 use ironfish_cluster::{
+    discovery::StaticDiscovery, CpuAwareLoadBalancer, GossipService, LoadBalancerConfig,
     MembershipManager, Node, NodeConfig,
-    discovery::StaticDiscovery,
-    GossipService, CpuAwareLoadBalancer, LoadBalancerConfig,
 };
 use ironfish_core::{ClusterDiscovery, LoadBalancer, NodeId, NodeInfo, NodeMetrics};
 
@@ -121,7 +120,10 @@ async fn test_load_balancer_update_metrics() {
         ..Default::default()
     };
 
-    balancer.update_metrics(&node_id, updated_metrics).await.unwrap();
+    balancer
+        .update_metrics(&node_id, updated_metrics)
+        .await
+        .unwrap();
 
     let selected = balancer.select_node(&[]).await;
     assert!(selected.is_ok());
@@ -147,7 +149,10 @@ async fn test_load_balancer_exclude_node() {
     balancer.add_node(node1.clone()).await;
     balancer.add_node(node2.clone()).await;
 
-    let selected = balancer.select_node(std::slice::from_ref(&node1)).await.unwrap();
+    let selected = balancer
+        .select_node(std::slice::from_ref(&node1))
+        .await
+        .unwrap();
     assert_eq!(selected, node2);
 }
 

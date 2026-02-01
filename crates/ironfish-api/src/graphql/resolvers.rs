@@ -152,10 +152,7 @@ impl AnalysisQuery {
     ) -> async_graphql::Result<BestMoveResult> {
         let state = ctx.data::<Arc<ApiState>>()?;
 
-        let request = BestMoveRequest {
-            fen,
-            movetime,
-        };
+        let request = BestMoveRequest { fen, movetime };
 
         let result = state.analysis.best_move(request).await?;
 

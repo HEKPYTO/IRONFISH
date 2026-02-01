@@ -41,17 +41,16 @@ impl ClusterDiscovery for StaticDiscovery {
     async fn discover(&self) -> Result<Vec<NodeInfo>> {
         let mut nodes = Vec::new();
 
-        for peer_str in &self.peers {
-            if let Ok(mut addrs) = tokio::net::lookup_host(peer_str).await {
-                while let Some(addr) = addrs.next() {
-                    nodes.push(NodeInfo {
-                        id: NodeId::from_string(format!("{}", addr)),
-                        address: addr,
-                        priority: 100,
-                        started_at: Utc::now(),
-                        version: "unknown".to_string(),
-                    });
-                }
+        for peer in &self.peers {
+            if let Some((name, addr)) = Self::resolve_peer(peer) {
+                let node = NodeInfo {
+                    id: NodeId::from_string(&name),
+                    address: addr,
+                    priority: 100,
+                    started_at: Utc::now(),
+                    version: "unknown".to_string(),
+                };
+                nodes.push(node);
             }
         }
 

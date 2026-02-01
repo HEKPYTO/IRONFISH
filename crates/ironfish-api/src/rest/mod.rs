@@ -31,7 +31,10 @@ impl RestRouter {
             .route("/cluster/status", get(handlers::cluster_status))
             .route("/cluster/join", post(handlers::cluster_join))
             .route("/cluster/leave", post(handlers::cluster_leave))
-            .route("/tokens", get(handlers::list_tokens).post(handlers::create_token))
+            .route(
+                "/tokens",
+                get(handlers::list_tokens).post(handlers::create_token),
+            )
             .route("/tokens/{id}", delete(handlers::revoke_token))
             .with_state(self.state.clone());
 

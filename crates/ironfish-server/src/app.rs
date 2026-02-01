@@ -1,17 +1,19 @@
-use std::sync::Arc;
 use chrono::Utc;
+use std::sync::Arc;
 use tokio::net::TcpListener;
 use tokio::signal;
 use tokio::sync::broadcast;
 use tracing::info;
 
+use crate::config::Config;
 use ironfish_api::{ApiRouter, ApiState};
 use ironfish_auth::SledTokenStore;
 use ironfish_auth::TokenManager;
-use ironfish_cluster::{ClusterConfig, ClusterService, GossipEnvelope, MembershipManager, Node, NodeConfig};
+use ironfish_cluster::{
+    ClusterConfig, ClusterService, GossipEnvelope, MembershipManager, Node, NodeConfig,
+};
 use ironfish_core::GossipMessage;
 use ironfish_stockfish::{AnalysisService, EnginePool, EnginePoolConfig};
-use crate::config::Config;
 
 pub struct Application {
     config: Config,
@@ -42,7 +44,10 @@ impl Application {
         };
 
         let pool = Arc::new(EnginePool::new(engine_config).await?);
-        info!(pool_size = config.stockfish.pool_size, "engine pool created");
+        info!(
+            pool_size = config.stockfish.pool_size,
+            "engine pool created"
+        );
 
         let analysis = Arc::new(AnalysisService::new(pool));
 
@@ -74,9 +79,15 @@ impl Application {
 
         let cluster = if config.cluster.enabled {
             let cluster_config = ClusterConfig {
-                discovery_interval: std::time::Duration::from_millis(config.cluster.gossip_interval_ms),
-                gossip_interval: std::time::Duration::from_millis(config.cluster.gossip_interval_ms),
-                health_check_interval: std::time::Duration::from_millis(config.cluster.heartbeat_interval_ms),
+                discovery_interval: std::time::Duration::from_millis(
+                    config.cluster.gossip_interval_ms,
+                ),
+                gossip_interval: std::time::Duration::from_millis(
+                    config.cluster.gossip_interval_ms,
+                ),
+                health_check_interval: std::time::Duration::from_millis(
+                    config.cluster.heartbeat_interval_ms,
+                ),
                 multicast_group: config.discovery.multicast_group.clone(),
                 multicast_port: config.discovery.multicast_port,
                 static_peers: config.discovery.static_peers.clone(),
@@ -97,7 +108,12 @@ impl Application {
             None
         };
 
-        Ok(Self { config, state, cluster, gossip_tx })
+        Ok(Self {
+            config,
+            state,
+            cluster,
+            gossip_tx,
+        })
     }
 
     pub async fn run(self) -> anyhow::Result<()> {
@@ -128,15 +144,11 @@ impl Application {
             .with_auth(self.config.auth.enabled)
             .build_rest_router();
 
-        let grpc_router = ApiRouter::new(self.state.clone())
-            .build_grpc_router();
+        let grpc_router = ApiRouter::new(self.state.clone()).build_grpc_router();
 
         let http_addr = self.config.node.bind_address;
         let grpc_port = self.config.node.bind_address.port() + 1;
-        let grpc_addr = std::net::SocketAddr::new(
-            self.config.node.bind_address.ip(),
-            grpc_port,
-        );
+        let grpc_addr = std::net::SocketAddr::new(self.config.node.bind_address.ip(), grpc_port);
 
         let listener = TcpListener::bind(http_addr).await?;
         info!(address = %http_addr, "REST/GraphQL server listening");

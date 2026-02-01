@@ -9,8 +9,8 @@ use axum::response::{IntoResponse, Response};
 use chrono::Utc;
 use tower::{Layer, Service};
 
-use ironfish_core::TokenStore;
 use crate::TokenManager;
+use ironfish_core::TokenStore;
 
 #[derive(Clone)]
 pub struct AuthLayer<S> {

@@ -1,6 +1,6 @@
+mod cluster_service;
 pub mod consensus;
 pub mod discovery;
-mod cluster_service;
 mod gossip;
 mod load_balancer;
 mod membership;

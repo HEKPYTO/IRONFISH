@@ -5,8 +5,7 @@ use tokio::sync::{broadcast, RwLock};
 use tracing::{debug, info, warn};
 
 use ironfish_core::{
-    ApiToken, ClusterDiscovery, GossipMessage, GossipProtocol,
-    Result, TokenStore,
+    ApiToken, ClusterDiscovery, GossipMessage, GossipProtocol, Result, TokenStore,
 };
 
 use crate::discovery::DiscoveryManager;
@@ -321,23 +320,21 @@ async fn process_gossip_message<T: TokenStore>(
     _gossip: &Arc<GossipService>,
 ) -> Result<()> {
     match &envelope.message {
-        GossipMessage::TokenCreated(token) => {
-            match token_store.get(&token.id).await {
-                Ok(Some(existing)) => {
-                    if token.created_at > existing.created_at {
-                        token_store.update(token.clone()).await?;
-                        info!("updated token {} from gossip", token.id);
-                    }
-                }
-                Ok(None) => {
-                    token_store.create(token.clone()).await?;
-                    info!("replicated token {} from gossip", token.id);
-                }
-                Err(e) => {
-                    warn!("failed to check token {}: {}", token.id, e);
+        GossipMessage::TokenCreated(token) => match token_store.get(&token.id).await {
+            Ok(Some(existing)) => {
+                if token.created_at > existing.created_at {
+                    token_store.update(token.clone()).await?;
+                    info!("updated token {} from gossip", token.id);
                 }
             }
-        }
+            Ok(None) => {
+                token_store.create(token.clone()).await?;
+                info!("replicated token {} from gossip", token.id);
+            }
+            Err(e) => {
+                warn!("failed to check token {}: {}", token.id, e);
+            }
+        },
         GossipMessage::TokenRevoked(token_id) => {
             if let Err(e) = token_store.revoke(token_id).await {
                 debug!("revoke token {} error: {}", token_id, e);

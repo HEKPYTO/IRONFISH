@@ -99,7 +99,10 @@ impl BullyElection {
         let my_priority = self.node.priority();
 
         if my_priority > from_priority {
-            debug!("responding to election from {} - I have higher priority", from);
+            debug!(
+                "responding to election from {} - I have higher priority",
+                from
+            );
             self.start_election().await.ok();
         }
     }
