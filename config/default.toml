@@ -1,0 +1,35 @@
+[node]
+id = "auto"
+bind_address = "0.0.0.0:8080"
+data_dir = "/var/lib/ironfish"
+priority = 100
+
+[stockfish]
+binary_path = "/usr/bin/stockfish"
+pool_size = 4
+default_depth = 20
+default_multipv = 3
+
+[cluster]
+enabled = true
+heartbeat_interval_ms = 1000
+election_timeout_ms = 5000
+gossip_interval_ms = 5000
+
+[discovery]
+static_peers = []
+seed_nodes = []
+multicast_enabled = true
+multicast_group = "239.255.42.98"
+multicast_port = 7878
+
+[auth]
+enabled = true
+token_ttl_days = 365
+rate_limit_per_minute = 100
+
+[load_balancer]
+strategy = "cpu_aware"
+cpu_weight = 0.4
+queue_weight = 0.3
+latency_weight = 0.3

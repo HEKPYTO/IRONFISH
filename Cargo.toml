@@ -1,0 +1,94 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/ironfish-core",
+    "crates/ironfish-stockfish",
+    "crates/ironfish-auth",
+    "crates/ironfish-cluster",
+    "crates/ironfish-api",
+    "crates/ironfish-cli",
+    "crates/ironfish-server",
+    "crates/ironfish-tests",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Ironfish Contributors"]
+license = "MIT"
+repository = "https://github.com/ironfish/ironfish"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+
+# HTTP/API
+axum = { version = "0.8", features = ["macros"] }
+tower = { version = "0.5", features = ["full"] }
+tower-http = { version = "0.6", features = ["cors", "trace", "compression-gzip"] }
+hyper = { version = "1.1", features = ["full"] }
+hyper-util = { version = "0.1", features = ["full"] }
+
+# gRPC
+tonic = { version = "0.11", features = ["gzip"] }
+tonic-build = "0.11"
+tonic-reflection = "0.11"
+prost = "0.12"
+prost-types = "0.12"
+
+# GraphQL
+async-graphql = { version = "7.0", features = ["chrono", "uuid"] }
+async-graphql-axum = "7.0"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Configuration
+config = "0.14"
+
+# CLI
+clap = { version = "4.4", features = ["derive", "env"] }
+
+# Logging & Metrics
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+metrics = "0.22"
+metrics-exporter-prometheus = "0.13"
+
+# Crypto
+ring = "0.17"
+base64 = "0.21"
+
+# Storage
+sled = "0.34"
+
+# Networking
+socket2 = { version = "0.5", features = ["all"] }
+
+# UUID & Time
+uuid = { version = "1.6", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Async utilities
+futures = "0.3"
+async-trait = "0.1"
+tokio-stream = { version = "0.1", features = ["sync"] }
+
+# Internal crates
+ironfish-core = { path = "crates/ironfish-core" }
+ironfish-stockfish = { path = "crates/ironfish-stockfish" }
+ironfish-auth = { path = "crates/ironfish-auth" }
+ironfish-cluster = { path = "crates/ironfish-cluster" }
+ironfish-api = { path = "crates/ironfish-api" }
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

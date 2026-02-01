@@ -1,0 +1,27 @@
+[package]
+name = "ironfish-server"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "ironfish-server"
+path = "src/main.rs"
+
+[dependencies]
+ironfish-core = { workspace = true }
+ironfish-stockfish = { workspace = true }
+ironfish-auth = { workspace = true }
+ironfish-cluster = { workspace = true }
+ironfish-api = { workspace = true }
+tokio = { workspace = true }
+axum = { workspace = true }
+config = { workspace = true }
+serde = { workspace = true }
+toml = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+chrono = { workspace = true }

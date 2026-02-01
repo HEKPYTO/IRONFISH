@@ -1,0 +1,70 @@
+services:
+  node1:
+    build: .
+    container_name: ironfish-node1
+    environment:
+      - RUST_LOG=info
+      - IRONFISH_NODE_ID=node1
+      - IRONFISH_BIND_ADDRESS=0.0.0.0:8080
+      - IRONFISH_CLUSTER_PEERS=node2:8080,node3:8080
+      - IRONFISH_ADMIN_KEY=${IRONFISH_ADMIN_KEY:-cluster-admin-secret}
+      - IRONFISH_TOKEN_SECRET=${IRONFISH_TOKEN_SECRET:-shared-cluster-token-secret}
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    networks:
+      - ironfish-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  node2:
+    build: .
+    container_name: ironfish-node2
+    environment:
+      - RUST_LOG=info
+      - IRONFISH_NODE_ID=node2
+      - IRONFISH_BIND_ADDRESS=0.0.0.0:8080
+      - IRONFISH_CLUSTER_PEERS=node1:8080,node3:8080
+      - IRONFISH_ADMIN_KEY=${IRONFISH_ADMIN_KEY:-cluster-admin-secret}
+      - IRONFISH_TOKEN_SECRET=${IRONFISH_TOKEN_SECRET:-shared-cluster-token-secret}
+    ports:
+      - "8082:8080"
+      - "8083:8081"
+    networks:
+      - ironfish-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  node3:
+    build: .
+    container_name: ironfish-node3
+    environment:
+      - RUST_LOG=info
+      - IRONFISH_NODE_ID=node3
+      - IRONFISH_BIND_ADDRESS=0.0.0.0:8080
+      - IRONFISH_CLUSTER_PEERS=node1:8080,node2:8080
+      - IRONFISH_ADMIN_KEY=${IRONFISH_ADMIN_KEY:-cluster-admin-secret}
+      - IRONFISH_TOKEN_SECRET=${IRONFISH_TOKEN_SECRET:-shared-cluster-token-secret}
+    ports:
+      - "8084:8080"
+      - "8085:8081"
+    networks:
+      - ironfish-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+networks:
+  ironfish-net:
+    driver: bridge

@@ -1,0 +1,21 @@
+[package]
+name = "ironfish-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "ironfish"
+path = "src/main.rs"
+
+[dependencies]
+ironfish-core = { workspace = true }
+clap = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+reqwest = { version = "0.11", features = ["json"] }
+tabled = "0.15"

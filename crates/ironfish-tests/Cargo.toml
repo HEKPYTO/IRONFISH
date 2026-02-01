@@ -1,0 +1,25 @@
+[package]
+name = "ironfish-tests"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+ironfish-core = { workspace = true }
+ironfish-stockfish = { workspace = true }
+ironfish-auth = { workspace = true }
+ironfish-cluster = { workspace = true }
+ironfish-api = { workspace = true }
+
+tokio = { workspace = true }
+axum = { workspace = true }
+tower = { workspace = true }
+hyper = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+tempfile = "3.10"
+reqwest = { version = "0.11", features = ["json"] }
+
+[dev-dependencies]
+tokio-test = "0.4"

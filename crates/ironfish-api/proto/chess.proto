@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package chess;
+
+service ChessAnalysis {
+  rpc Analyze(AnalyzeRequest) returns (AnalyzeResponse);
+  rpc BestMove(BestMoveRequest) returns (BestMoveResponse);
+  rpc StreamAnalysis(AnalyzeRequest) returns (stream AnalysisUpdate);
+}
+
+service ClusterAdmin {
+  rpc GetStatus(Empty) returns (ClusterStatus);
+  rpc JoinCluster(JoinRequest) returns (JoinResponse);
+  rpc LeaveCluster(LeaveRequest) returns (LeaveResponse);
+}
+
+message Empty {}
+
+message AnalyzeRequest {
+  string fen = 1;
+  uint32 depth = 2;
+  uint32 multipv = 3;
+  optional uint64 movetime_ms = 4;
+}
+
+message AnalyzeResponse {
+  string id = 1;
+  string fen = 2;
+  Move best_move = 3;
+  optional Move ponder = 4;
+  Evaluation evaluation = 5;
+  repeated PrincipalVariation principal_variations = 6;
+  uint32 depth_reached = 7;
+  uint64 nodes_searched = 8;
+  uint64 time_ms = 9;
+}
+
+message Move {
+  string from = 1;
+  string to = 2;
+  optional string promotion = 3;
+}
+
+message Evaluation {
+  ScoreType score_type = 1;
+  int32 value = 2;
+}
+
+enum ScoreType {
+  CENTIPAWNS = 0;
+  MATE = 1;
+}
+
+message PrincipalVariation {
+  uint32 rank = 1;
+  repeated Move moves = 2;
+  Evaluation evaluation = 3;
+  uint32 depth = 4;
+}
+
+message AnalysisUpdate {
+  string id = 1;
+  uint32 current_depth = 2;
+  uint32 target_depth = 3;
+  optional Move current_move = 4;
+  uint64 nodes_per_second = 5;
+}
+
+message BestMoveRequest {
+  string fen = 1;
+  optional uint64 movetime_ms = 2;
+}
+
+message BestMoveResponse {
+  Move best_move = 1;
+  optional Move ponder = 2;
+}
+
+message ClusterStatus {
+  repeated NodeStatus nodes = 1;
+  optional string leader_id = 2;
+  uint64 term = 3;
+  bool healthy = 4;
+}
+
+message NodeStatus {
+  string id = 1;
+  string address = 2;
+  string state = 3;
+  uint64 uptime_seconds = 4;
+}
+
+message JoinRequest {
+  string node_id = 1;
+  string address = 2;
+  uint32 priority = 3;
+}
+
+message JoinResponse {
+  bool accepted = 1;
+  optional string leader_id = 2;
+  repeated string members = 3;
+  uint64 term = 4;
+}
+
+message LeaveRequest {
+  string node_id = 1;
+}
+
+message LeaveResponse {
+  bool success = 1;
+}
