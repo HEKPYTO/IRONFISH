@@ -1,7 +1,9 @@
 use crate::helpers::DockerCluster;
 use serde_json::json;
+use serial_test::serial;
 const CLUSTER_ADMIN_KEY: &str = "cluster-admin-secret";
 #[tokio::test]
+#[serial]
 async fn test_single_node_docker() {
     let cluster = DockerCluster::start(1).await;
     assert!(cluster.wait_healthy(60).await, "cluster not healthy");
@@ -14,6 +16,7 @@ async fn test_single_node_docker() {
     cluster.stop().await;
 }
 #[tokio::test]
+#[serial]
 async fn test_three_node_cluster() {
     let cluster = DockerCluster::start(3).await;
     assert!(cluster.wait_healthy(120).await, "cluster not healthy");
@@ -26,6 +29,7 @@ async fn test_three_node_cluster() {
     cluster.stop().await;
 }
 #[tokio::test]
+#[serial]
 async fn test_cluster_analysis_distribution() {
     let cluster = DockerCluster::start(3).await;
     assert!(cluster.wait_healthy(120).await, "cluster not healthy");
@@ -56,6 +60,7 @@ async fn test_cluster_analysis_distribution() {
     cluster.stop().await;
 }
 #[tokio::test]
+#[serial]
 async fn test_cluster_token_replication() {
     let cluster = DockerCluster::start(3).await;
     assert!(cluster.wait_healthy(120).await, "cluster not healthy");
@@ -83,6 +88,7 @@ async fn test_cluster_token_replication() {
     cluster.stop().await;
 }
 #[tokio::test]
+#[serial]
 async fn test_cluster_node_failure_recovery() {
     let cluster = DockerCluster::start(3).await;
     assert!(cluster.wait_healthy(120).await, "cluster not healthy");
@@ -103,6 +109,7 @@ async fn test_cluster_node_failure_recovery() {
     cluster.stop().await;
 }
 #[tokio::test]
+#[serial]
 async fn test_cluster_graphql_across_nodes() {
     let cluster = DockerCluster::start(3).await;
     assert!(cluster.wait_healthy(120).await, "cluster not healthy");
@@ -145,6 +152,7 @@ async fn test_cluster_graphql_across_nodes() {
 }
 
 #[tokio::test]
+#[serial]
 async fn test_multiplexed_grpc() {
     use ironfish_api::proto::chess_analysis_client::ChessAnalysisClient;
     use ironfish_api::proto::AnalyzeRequest;
