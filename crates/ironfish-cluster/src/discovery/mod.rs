@@ -10,7 +10,7 @@ pub use seed::SeedDiscovery;
 pub use static_conf::StaticDiscovery;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tracing::{debug, info};
+use tracing::debug;
 pub struct DiscoveryManager {
     static_discovery: Option<StaticDiscovery>,
     seed_discovery: Option<SeedDiscovery>,

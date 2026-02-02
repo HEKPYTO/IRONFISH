@@ -118,7 +118,7 @@ pub async fn metrics(State(state): State<Arc<ApiState>>) -> Json<MetricsResponse
 
     let mut system = sysinfo::System::new_all();
     system.refresh_all();
-    let cpu_usage = system.global_cpu_info().cpu_usage();
+    let cpu_usage = system.global_cpu_usage();
     let memory_usage = system.used_memory() as f32 / system.total_memory() as f32;
 
     Json(MetricsResponse {
