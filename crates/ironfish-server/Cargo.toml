@@ -25,3 +25,4 @@ tracing-subscriber = { workspace = true }
 thiserror = { workspace = true }
 anyhow = { workspace = true }
 chrono = { workspace = true }
+sysinfo = "0.38.0"

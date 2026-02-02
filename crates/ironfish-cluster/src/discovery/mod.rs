@@ -114,7 +114,7 @@ impl ClusterDiscovery for DiscoveryManager {
                 known.push(peer.clone());
             }
         }
-        info!("discovered {} total peers", known.len());
+        debug!("discovered {} total peers", known.len());
         Ok(known.clone())
     }
     async fn announce(&self, node: &NodeInfo) -> Result<()> {

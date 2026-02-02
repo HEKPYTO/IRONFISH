@@ -115,9 +115,15 @@ pub async fn metrics(State(state): State<Arc<ApiState>>) -> Json<MetricsResponse
         .pool()
         .map(|p| (p.active() as u32, p.available() as u32, p.size() as u32))
         .unwrap_or((0, 0, 0));
+
+    let mut system = sysinfo::System::new_all();
+    system.refresh_all();
+    let cpu_usage = system.global_cpu_info().cpu_usage();
+    let memory_usage = system.used_memory() as f32 / system.total_memory() as f32;
+
     Json(MetricsResponse {
-        cpu_usage: 0.0,
-        memory_usage: 0.0,
+        cpu_usage,
+        memory_usage,
         active_analyses: active,
         queue_depth: 0,
         engines_available: available,
