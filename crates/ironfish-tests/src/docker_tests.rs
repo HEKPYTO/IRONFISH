@@ -1,7 +1,7 @@
-use crate::helpers::DockerCluster;
+use crate::helpers::{DockerCluster, TEST_ADMIN_KEY};
 use serde_json::json;
 use serial_test::serial;
-const CLUSTER_ADMIN_KEY: &str = "cluster-admin-secret";
+
 #[tokio::test]
 #[serial]
 async fn test_single_node_docker() {
@@ -36,7 +36,7 @@ async fn test_cluster_analysis_distribution() {
     let client = reqwest::Client::new();
     let token_resp = client
         .post(format!("{}/_admin/tokens", cluster.nodes[0]))
-        .header("X-Admin-Key", CLUSTER_ADMIN_KEY)
+        .header("X-Admin-Key", TEST_ADMIN_KEY)
         .json(&json!({ "name": "test" }))
         .send()
         .await
@@ -70,7 +70,7 @@ async fn test_cluster_token_replication() {
     let client = reqwest::Client::new();
     let token_resp = client
         .post(format!("{}/_admin/tokens", cluster.nodes[0]))
-        .header("X-Admin-Key", CLUSTER_ADMIN_KEY)
+        .header("X-Admin-Key", TEST_ADMIN_KEY)
         .json(&json!({ "name": "replicated-token" }))
         .send()
         .await
@@ -121,7 +121,7 @@ async fn test_cluster_graphql_across_nodes() {
 
     let token_resp = client
         .post(format!("{}/_admin/tokens", cluster.nodes[0]))
-        .header("X-Admin-Key", CLUSTER_ADMIN_KEY)
+        .header("X-Admin-Key", TEST_ADMIN_KEY)
         .json(&json!({ "name": "graphql-test" }))
         .send()
         .await

@@ -211,6 +211,16 @@ impl DockerCluster {
 
 impl Drop for DockerCluster {
     fn drop(&mut self) {
+        if std::thread::panicking() {
+            let output = std::process::Command::new("docker")
+                .args(["compose", "logs"])
+                .current_dir(env!("CARGO_MANIFEST_DIR").replace("/crates/ironfish-tests", ""))
+                .output();
+            if let Ok(o) = output {
+                println!("DOCKER LOGS:\n{}", String::from_utf8_lossy(&o.stdout));
+                eprintln!("DOCKER ERRORS:\n{}", String::from_utf8_lossy(&o.stderr));
+            }
+        }
         let _ = std::process::Command::new("docker")
             .args(["compose", "down", "-v"])
             .current_dir(env!("CARGO_MANIFEST_DIR").replace("/crates/ironfish-tests", ""))
