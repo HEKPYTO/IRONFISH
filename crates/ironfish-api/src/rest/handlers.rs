@@ -1,15 +1,15 @@
-use std::sync::Arc;
+use crate::ApiState;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::Json;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use ironfish_core::{
     AnalysisRequest, AnalysisResult, BestMoveRequest, BestMoveResponse, ClusterStatus,
     CreateTokenRequest, CreateTokenResponse, JoinRequest, NodeInfo, TokenMetadata, TokenStore,
 };
-use crate::ApiState;
+use serde::{Deserialize, Serialize};
+use std::sync::Arc;
+use uuid::Uuid;
 #[derive(Debug, Deserialize)]
 pub struct AnalyzeBody {
     pub fen: String,

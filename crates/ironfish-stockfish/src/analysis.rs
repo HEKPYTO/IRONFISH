@@ -1,14 +1,14 @@
-use std::collections::HashMap;
-use std::sync::Arc;
+use crate::engine::{BestMove, UciInfo};
+use crate::pool::EnginePool;
 use chrono::Utc;
-use tokio::time::{timeout, Duration};
-use tracing::{debug, instrument};
 use ironfish_core::{
     AnalysisRequest, AnalysisResult, BestMoveRequest, BestMoveResponse, ChessPosition, Error,
     Evaluation, Move, PrincipalVariation, Result,
 };
-use crate::engine::{BestMove, UciInfo};
-use crate::pool::EnginePool;
+use std::collections::HashMap;
+use std::sync::Arc;
+use tokio::time::{timeout, Duration};
+use tracing::{debug, instrument};
 pub struct AnalysisService {
     pool: Option<Arc<EnginePool>>,
     default_depth: u8,

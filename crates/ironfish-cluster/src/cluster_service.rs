@@ -1,17 +1,17 @@
-use std::sync::Arc;
-use std::time::Duration;
-use tokio::sync::{broadcast, RwLock};
-use tracing::{debug, info, warn};
-use ironfish_core::{
-    ApiToken, ClusterDiscovery, ConsensusProtocol, GossipMessage, GossipProtocol, Result,
-    TokenStore,
-};
 use crate::consensus::HybridConsensus;
 use crate::discovery::DiscoveryManager;
 use crate::gossip::GossipService;
 use crate::membership::MembershipManager;
 use crate::network::{GossipEnvelope, NetworkService};
 use crate::node::SharedNode;
+use ironfish_core::{
+    ApiToken, ClusterDiscovery, ConsensusProtocol, GossipMessage, GossipProtocol, Result,
+    TokenStore,
+};
+use std::sync::Arc;
+use std::time::Duration;
+use tokio::sync::{broadcast, RwLock};
+use tracing::{debug, info, warn};
 pub struct ClusterConfig {
     pub discovery_interval: Duration,
     pub gossip_interval: Duration,

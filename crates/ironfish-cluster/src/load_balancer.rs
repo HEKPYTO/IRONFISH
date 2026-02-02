@@ -1,10 +1,10 @@
+use async_trait::async_trait;
+use ironfish_core::{Error, LoadBalancer, NodeId, NodeMetrics, Result};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-use async_trait::async_trait;
 use tokio::sync::RwLock;
 use tracing::debug;
-use ironfish_core::{Error, LoadBalancer, NodeId, NodeMetrics, Result};
 #[derive(Debug, Clone)]
 pub struct LoadBalancerConfig {
     pub strategy: LoadBalanceStrategy,

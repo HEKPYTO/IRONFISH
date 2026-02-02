@@ -1,8 +1,8 @@
-use std::net::{SocketAddr, ToSocketAddrs};
 use async_trait::async_trait;
 use chrono::Utc;
-use tracing::debug;
 use ironfish_core::{ClusterDiscovery, NodeId, NodeInfo, Result};
+use std::net::{SocketAddr, ToSocketAddrs};
+use tracing::debug;
 pub struct StaticDiscovery {
     peers: Vec<String>,
 }

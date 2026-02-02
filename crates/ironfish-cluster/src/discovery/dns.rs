@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 use chrono::Utc;
+use ironfish_core::{ClusterDiscovery, NodeId, NodeInfo, Result};
 use tokio::net::lookup_host;
 use tracing::{debug, warn};
-use ironfish_core::{ClusterDiscovery, NodeId, NodeInfo, Result};
 pub struct DnsDiscovery {
     hostname: String,
     port: u16,

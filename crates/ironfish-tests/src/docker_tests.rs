@@ -161,15 +161,19 @@ async fn test_multiplexed_grpc() {
         movetime_ms: None,
     });
     let response: Result<_, tonic::Status> = client.analyze(request).await;
-    
+
     // We expect Unauthenticated or OK
     if let Err(status) = response {
-        // If the server is reachable but rejects auth (Unauthenticated) or fails internally (Internal) 
+        // If the server is reachable but rejects auth (Unauthenticated) or fails internally (Internal)
         // due to missing headers, it means the connection/multiplexing worked.
         // We just want to ensure we didn't get a transport error (Unavailable).
         assert!(
-            matches!(status.code(), tonic::Code::Unauthenticated | tonic::Code::Internal),
-            "Expected Unauthenticated or Internal, got: {:?}", status
+            matches!(
+                status.code(),
+                tonic::Code::Unauthenticated | tonic::Code::Internal
+            ),
+            "Expected Unauthenticated or Internal, got: {:?}",
+            status
         );
     }
 

@@ -1,16 +1,16 @@
-use std::sync::Arc;
-use std::time::Duration;
+use super::bully::BullyElection;
+use super::raft::RaftConsensus;
+use crate::node::SharedNode;
 use async_trait::async_trait;
-use tokio::sync::broadcast;
-use tokio::time::interval;
-use tracing::{debug, info, warn};
 use ironfish_core::{
     ConsensusProtocol, HeartbeatRequest, HeartbeatResponse, NodeId, NodeInfo, NodeState, Result,
     VoteRequest, VoteResponse,
 };
-use crate::node::SharedNode;
-use super::bully::BullyElection;
-use super::raft::RaftConsensus;
+use std::sync::Arc;
+use std::time::Duration;
+use tokio::sync::broadcast;
+use tokio::time::interval;
+use tracing::{debug, info, warn};
 pub struct HybridConsensus {
     node: SharedNode,
     raft: Arc<RaftConsensus>,

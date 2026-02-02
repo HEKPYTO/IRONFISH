@@ -1,6 +1,6 @@
+use serde::Deserialize;
 use std::net::SocketAddr;
 use std::path::PathBuf;
-use serde::Deserialize;
 #[allow(dead_code)]
 #[derive(Debug, Clone, Deserialize, Default)]
 pub struct Config {

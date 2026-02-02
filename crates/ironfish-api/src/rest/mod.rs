@@ -1,9 +1,9 @@
 mod handlers;
-pub use handlers::*;
-use std::sync::Arc;
+use crate::ApiState;
 use axum::routing::{delete, get, post};
 use axum::Router;
-use crate::ApiState;
+pub use handlers::*;
+use std::sync::Arc;
 pub struct RestRouter {
     state: Arc<ApiState>,
 }

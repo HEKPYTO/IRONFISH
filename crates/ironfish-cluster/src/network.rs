@@ -1,13 +1,13 @@
+use ironfish_core::{Error, GossipMessage, NodeId, NodeInfo, Result};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
-use serde::{Deserialize, Serialize};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::{broadcast, mpsc, RwLock};
 use tracing::{debug, error, info, warn};
-use ironfish_core::{Error, GossipMessage, NodeId, NodeInfo, Result};
 const GOSSIP_PORT_OFFSET: u16 = 100;
 const MAX_MESSAGE_SIZE: usize = 1024 * 1024;
 #[derive(Debug, Clone, Serialize, Deserialize)]

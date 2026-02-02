@@ -1,3 +1,4 @@
+use ironfish_core::{Error, Result};
 use std::process::Stdio;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -5,7 +6,6 @@ use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::{Child, ChildStdin, ChildStdout, Command};
 use tokio::sync::Mutex;
 use tracing::{debug, trace};
-use ironfish_core::{Error, Result};
 pub struct StockfishEngine {
     stdin: Arc<Mutex<ChildStdin>>,
     stdout: Arc<Mutex<BufReader<ChildStdout>>>,
@@ -147,9 +147,9 @@ impl StockfishEngine {
     pub async fn is_running(&self) -> bool {
         let mut process = self._process.lock().await;
         match process.try_wait() {
-            Ok(Some(_)) => false,  
-            Ok(None) => true,      
-            Err(_) => false,       
+            Ok(Some(_)) => false,
+            Ok(None) => true,
+            Err(_) => false,
         }
     }
 }

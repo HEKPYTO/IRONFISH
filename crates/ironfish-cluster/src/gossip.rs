@@ -1,13 +1,13 @@
+use async_trait::async_trait;
+use chrono::{DateTime, Utc};
+use ironfish_core::{Error, GossipMessage, GossipProtocol, NodeId, NodeInfo, Result};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
-use async_trait::async_trait;
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
 use tokio::sync::{broadcast, mpsc, RwLock};
 use tokio::time::interval;
 use tracing::{debug, info};
-use ironfish_core::{Error, GossipMessage, GossipProtocol, NodeId, NodeInfo, Result};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct GossipEntry {
     message: GossipMessage,

@@ -1,6 +1,6 @@
-use async_trait::async_trait;
 use crate::error::Result;
 use crate::types::*;
+use async_trait::async_trait;
 #[async_trait]
 pub trait AnalysisEngine: Send + Sync {
     async fn analyze(&self, request: AnalysisRequest) -> Result<AnalysisResult>;

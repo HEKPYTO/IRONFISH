@@ -1,8 +1,8 @@
+use chrono::Utc;
+use ironfish_core::{NodeId, NodeInfo, NodeMetrics, NodeState, NodeStatus};
 use std::net::SocketAddr;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, RwLock};
-use chrono::Utc;
-use ironfish_core::{NodeId, NodeInfo, NodeMetrics, NodeState, NodeStatus};
 #[derive(Debug, Clone)]
 pub struct NodeConfig {
     pub id: Option<String>,

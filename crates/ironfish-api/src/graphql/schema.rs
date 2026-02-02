@@ -1,11 +1,11 @@
-use std::sync::Arc;
+use super::resolvers::{AnalysisMutation, AnalysisQuery, ClusterQuery, TokenMutation, TokenQuery};
+use crate::ApiState;
 use async_graphql::{EmptySubscription, MergedObject, Schema};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::extract::State;
 use axum::routing::post;
 use axum::Router;
-use crate::ApiState;
-use super::resolvers::{AnalysisMutation, AnalysisQuery, ClusterQuery, TokenMutation, TokenQuery};
+use std::sync::Arc;
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(AnalysisQuery, ClusterQuery, TokenQuery);
 #[derive(MergedObject, Default)]

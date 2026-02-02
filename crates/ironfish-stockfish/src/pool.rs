@@ -1,9 +1,9 @@
+use crate::engine::StockfishEngine;
+use ironfish_core::{Error, Result};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use tokio::sync::{Semaphore, SemaphorePermit};
 use tracing::{debug, info, warn};
-use ironfish_core::{Error, Result};
-use crate::engine::StockfishEngine;
 #[derive(Debug, Clone)]
 pub struct EnginePoolConfig {
     pub binary_path: String,

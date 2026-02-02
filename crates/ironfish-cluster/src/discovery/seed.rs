@@ -1,9 +1,9 @@
-use std::time::Duration;
 use async_trait::async_trait;
+use ironfish_core::{ClusterDiscovery, Error, NodeId, NodeInfo, Result};
+use std::time::Duration;
 use tokio::net::TcpStream;
 use tokio::time::timeout;
 use tracing::{debug, warn};
-use ironfish_core::{ClusterDiscovery, Error, NodeId, NodeInfo, Result};
 pub struct SeedDiscovery {
     seeds: Vec<String>,
     timeout: Duration,

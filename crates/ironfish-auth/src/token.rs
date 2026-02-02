@@ -1,9 +1,9 @@
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
 use chrono::{Duration, Utc};
+use ironfish_core::{ApiToken, CreateTokenRequest, CreateTokenResponse, Error, Result};
 use ring::hmac;
 use ring::rand::{SecureRandom, SystemRandom};
 use uuid::Uuid;
-use ironfish_core::{ApiToken, CreateTokenRequest, CreateTokenResponse, Error, Result};
 const TOKEN_PREFIX: &str = "iff_";
 const TOKEN_RANDOM_BYTES: usize = 32;
 pub struct TokenManager {

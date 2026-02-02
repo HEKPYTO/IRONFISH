@@ -1,12 +1,12 @@
+use async_trait::async_trait;
+use ironfish_core::{ClusterDiscovery, Error, NodeId, NodeInfo, Result};
+use socket2::{Domain, Protocol, Socket, Type};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::sync::Arc;
 use std::time::Duration;
-use async_trait::async_trait;
-use socket2::{Domain, Protocol, Socket, Type};
 use tokio::net::UdpSocket;
 use tokio::sync::RwLock;
 use tracing::{debug, warn};
-use ironfish_core::{ClusterDiscovery, Error, NodeId, NodeInfo, Result};
 const DISCOVERY_MSG_ANNOUNCE: u8 = 1;
 const DISCOVERY_MSG_WITHDRAW: u8 = 2;
 pub struct MulticastDiscovery {

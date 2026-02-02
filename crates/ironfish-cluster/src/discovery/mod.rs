@@ -2,15 +2,15 @@ mod dns;
 mod multicast;
 mod seed;
 mod static_conf;
+use async_trait::async_trait;
 pub use dns::DnsDiscovery;
+use ironfish_core::{ClusterDiscovery, NodeId, NodeInfo, Result};
 pub use multicast::MulticastDiscovery;
 pub use seed::SeedDiscovery;
 pub use static_conf::StaticDiscovery;
 use std::sync::Arc;
-use async_trait::async_trait;
 use tokio::sync::RwLock;
 use tracing::{debug, info};
-use ironfish_core::{ClusterDiscovery, NodeId, NodeInfo, Result};
 pub struct DiscoveryManager {
     static_discovery: Option<StaticDiscovery>,
     seed_discovery: Option<SeedDiscovery>,

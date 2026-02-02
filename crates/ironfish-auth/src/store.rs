@@ -1,9 +1,9 @@
-use std::path::Path;
-use std::sync::Arc;
 use async_trait::async_trait;
 use chrono::Utc;
-use uuid::Uuid;
 use ironfish_core::{ApiToken, Error, Result, TokenStore};
+use std::path::Path;
+use std::sync::Arc;
+use uuid::Uuid;
 #[derive(Clone)]
 pub struct SledTokenStore {
     db: Arc<sled::Db>,
@@ -133,8 +133,8 @@ impl TokenStore for SledTokenStore {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ironfish_core::CreateTokenRequest;
     use crate::TokenManager;
+    use ironfish_core::CreateTokenRequest;
     #[tokio::test]
     async fn test_token_store() {
         let store = SledTokenStore::in_memory().unwrap();

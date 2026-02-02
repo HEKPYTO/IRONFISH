@@ -1,10 +1,10 @@
 use chrono::Utc;
-use std::sync::Arc;
 use ironfish_cluster::{
     discovery::StaticDiscovery, CpuAwareLoadBalancer, GossipService, LoadBalancerConfig,
     MembershipManager, Node, NodeConfig,
 };
 use ironfish_core::{ClusterDiscovery, LoadBalancer, NodeId, NodeInfo, NodeMetrics};
+use std::sync::Arc;
 #[tokio::test]
 async fn test_node_creation_with_auto_id() {
     let config = NodeConfig::default();

@@ -1,14 +1,14 @@
-use std::future::Future;
-use std::pin::Pin;
-use std::sync::Arc;
-use std::task::{Context, Poll};
+use crate::TokenManager;
 use axum::body::Body;
 use axum::http::{Method, Request, StatusCode};
 use axum::response::{IntoResponse, Response};
 use chrono::Utc;
-use tower::{Layer, Service};
-use crate::TokenManager;
 use ironfish_core::TokenStore;
+use std::future::Future;
+use std::pin::Pin;
+use std::sync::Arc;
+use std::task::{Context, Poll};
+use tower::{Layer, Service};
 #[derive(Clone)]
 pub struct AuthLayer<S> {
     store: Arc<S>,

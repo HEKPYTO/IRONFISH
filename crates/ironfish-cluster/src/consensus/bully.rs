@@ -1,11 +1,11 @@
+use crate::node::SharedNode;
+use ironfish_core::{NodeId, NodeInfo, NodeState, Result};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::RwLock;
 use tokio::time::timeout;
 use tracing::{debug, info};
-use ironfish_core::{NodeId, NodeInfo, NodeState, Result};
-use crate::node::SharedNode;
 pub struct BullyElection {
     node: SharedNode,
     peers: Arc<RwLock<HashMap<NodeId, NodeInfo>>>,

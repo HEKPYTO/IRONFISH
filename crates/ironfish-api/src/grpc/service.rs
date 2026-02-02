@@ -1,8 +1,3 @@
-use std::pin::Pin;
-use std::sync::Arc;
-use futures::Stream;
-use tonic::{Request, Response, Status};
-use ironfish_core::{AnalysisRequest, BestMoveRequest};
 use crate::proto::{
     chess_analysis_server::{ChessAnalysis, ChessAnalysisServer},
     cluster_admin_server::{ClusterAdmin, ClusterAdminServer},
@@ -14,6 +9,11 @@ use crate::proto::{
     NodeStatus as ProtoNodeStatus, PrincipalVariation as ProtoPv, ScoreType as ProtoScoreType,
 };
 use crate::ApiState;
+use futures::Stream;
+use ironfish_core::{AnalysisRequest, BestMoveRequest};
+use std::pin::Pin;
+use std::sync::Arc;
+use tonic::{Request, Response, Status};
 pub struct GrpcService {
     state: Arc<ApiState>,
 }

@@ -1,15 +1,15 @@
-use std::collections::HashMap;
-use std::sync::Arc;
-use std::time::Duration;
+use crate::node::SharedNode;
 use async_trait::async_trait;
-use tokio::sync::{broadcast, RwLock};
-use tokio::time::interval;
-use tracing::{debug, info};
 use ironfish_core::{
     ConsensusProtocol, HeartbeatRequest, HeartbeatResponse, NodeId, NodeInfo, NodeState, Result,
     VoteRequest, VoteResponse,
 };
-use crate::node::SharedNode;
+use std::collections::HashMap;
+use std::sync::Arc;
+use std::time::Duration;
+use tokio::sync::{broadcast, RwLock};
+use tokio::time::interval;
+use tracing::{debug, info};
 pub struct RaftConsensus {
     node: SharedNode,
     peers: Arc<RwLock<HashMap<NodeId, NodeInfo>>>,

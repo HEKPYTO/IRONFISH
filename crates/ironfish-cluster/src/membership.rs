@@ -1,11 +1,11 @@
+use crate::node::SharedNode;
+use ironfish_core::{
+    ClusterStatus, JoinRequest, JoinResponse, NodeId, NodeInfo, NodeState, NodeStatus, Result,
+};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tracing::{debug, info, warn};
-use ironfish_core::{
-    ClusterStatus, JoinRequest, JoinResponse, NodeId, NodeInfo, NodeState, NodeStatus, Result,
-};
-use crate::node::SharedNode;
 pub struct MembershipManager {
     local_node: SharedNode,
     members: Arc<RwLock<HashMap<NodeId, NodeInfo>>>,
