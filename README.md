@@ -32,7 +32,7 @@ Whether you are a developer building a chess GUI, a researcher analyzing games, 
 
 Ironfish operates on a peer-to-peer architecture using a **Gossip Protocol** for membership and state sharing.
 
-1.  **API Layer:** Handles incoming requests (REST/GraphQL/gRPC) and authenticates users.
+1.  **API Layer:** Handles incoming requests (REST / gRPC / GraphQL) and authenticates users.
 2.  **Cluster Service:** Manages node discovery, failure detection, and leader election (Hybrid Raft/Bully algorithm).
 3.  **Load Balancer:** Smartly routes analysis requests to the least loaded node in the cluster.
 4.  **Stockfish Pool:** Manages a local pool of Stockfish engine processes to execute the actual chess analysis.
@@ -58,7 +58,7 @@ docker run -d -p 8080:8080 --name ironfish \
   ghcr.io/hekpyto/ironfish:latest
 ```
 
-Your server is now ready at `http://localhost:8080`!
+Your server is now ready at `http://localhost:8080`
 
 ### Mode 2: Distributed Cluster
 Ideal for high-availability and parallel processing.
