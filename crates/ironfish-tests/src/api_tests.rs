@@ -1,4 +1,4 @@
-use crate::helpers::{TestServer, TEST_ADMIN_KEY};
+use crate::helpers::TestServer;
 use serde_json::json;
 #[tokio::test]
 async fn test_health_endpoint() {

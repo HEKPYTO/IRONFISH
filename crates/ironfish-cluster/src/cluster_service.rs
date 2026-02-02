@@ -88,7 +88,7 @@ impl<T: TokenStore + Send + Sync + 'static> ClusterService<T> {
         self.gossip.start().await?;
         self.consensus.start().await?;
         let local_info = self.local_node.info();
-        self.discovery.announce(&local_info).await?;
+        self.discovery.announce(local_info).await?;
         self.start_discovery_loop().await;
         self.start_gossip_receiver().await;
         self.start_gossip_sync_loop().await;
@@ -234,7 +234,7 @@ impl<T: TokenStore + Send + Sync + 'static> ClusterService<T> {
                 tokio::select! {
                     _ = timer.tick() => {
                         let info = local_node.info();
-                        if let Err(e) = discovery.announce(&info).await {
+                        if let Err(e) = discovery.announce(info).await {
                             debug!("announcement failed: {}", e);
                         }
                     }
