@@ -150,6 +150,12 @@ impl DockerCluster {
             args.push(s);
         }
 
+        // Cleanup potential leftovers from previous runs (e.g. if panic happened before Drop)
+        let _ = std::process::Command::new("docker")
+            .args(["compose", "down", "-v"])
+            .current_dir(env!("CARGO_MANIFEST_DIR").replace("/crates/ironfish-tests", ""))
+            .output();
+
         let output = std::process::Command::new("docker")
             .args(&args)
             .current_dir(env!("CARGO_MANIFEST_DIR").replace("/crates/ironfish-tests", ""))
@@ -200,5 +206,14 @@ impl DockerCluster {
             tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
         }
         false
+    }
+}
+
+impl Drop for DockerCluster {
+    fn drop(&mut self) {
+        let _ = std::process::Command::new("docker")
+            .args(["compose", "down", "-v"])
+            .current_dir(env!("CARGO_MANIFEST_DIR").replace("/crates/ironfish-tests", ""))
+            .output();
     }
 }

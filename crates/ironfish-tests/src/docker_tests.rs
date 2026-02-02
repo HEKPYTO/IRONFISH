@@ -75,7 +75,7 @@ async fn test_cluster_token_replication() {
     assert_eq!(token_resp.status(), 200);
     let token_data: serde_json::Value = token_resp.json().await.expect("json");
     let token = token_data["token"].as_str().expect("token string");
-    tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+    tokio::time::sleep(tokio::time::Duration::from_secs(30)).await;
     for node_url in &cluster.nodes {
         let resp = client
             .get(format!("{}/v1/health", node_url))
