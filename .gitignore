@@ -30,4 +30,4 @@ Thumbs.db
 !README.md
 docs/audit/
 /*.sh
-/.txt
+/.txt.git/hooks/pre-commit

@@ -105,7 +105,7 @@ fn default_bind_address() -> SocketAddr {
     std::env::var("IRONFISH_BIND_ADDRESS")
         .ok()
         .and_then(|s| s.parse().ok())
-        .unwrap_or_else(|| "0.0.0.0:8080".parse().unwrap())
+        .unwrap_or_else(|| "0.0.0.0:8080".parse().expect("valid default address"))
 }
 fn default_data_dir() -> PathBuf {
     PathBuf::from("/var/lib/ironfish")

@@ -1,208 +1,84 @@
 # Ironfish
 
-<div align="left">
+Ironfish is a **fault-tolerant, distributed chess analysis engine** built with Rust. It leverages **Stockfish**, **Docker**, and **Gossip protocols** to create a resilient, scalable, and self-healing cluster for chess position analysis.
 
-[![Status](https://img.shields.io/badge/Status-Active-success?style=flat-square)]()
-[![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange?style=flat-square&logo=rust)](https://www.rust-lang.org)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
-[![Docker](https://img.shields.io/badge/Docker-Supported-2496ED?style=flat-square&logo=docker)]()
-[![Protocol](https://img.shields.io/badge/Protocol-gRPC%20%7C%20REST%20%7C%20GraphQL-purple?style=flat-square)]()
+## Key Features
 
-</div>
+- **Distributed Analysis:** Distributes chess analysis workload across a cluster of nodes.
+- **Fault Tolerance:** Built-in leader election (Hybrid Raft/Bully) and self-healing capabilities. If a node dies, the cluster recovers automatically.
+- **Auto-Discovery:** Nodes discover each other via Static config, UDP Multicast, or DNS (Cloud/Kubernetes).
+- **Load Balancing:** CPU-aware and Queue-aware load balancing strategies.
+- **Secure API:** Token-based authentication (`X-Admin-Key` for management, Bearer tokens for usage).
+- **Multi-Protocol Support:** Single port (8080) exposes REST, gRPC, and GraphQL APIs.
+- **Observability:** Built-in metrics (`/v1/metrics`) tracking CPU, Memory, and Engine usage.
 
-<div align="center">
-  <img src="assets/logo.png" alt="Ironfish Logo" width="256" />
-</div>
+## Architecture
 
-A distributed, fault-tolerant chess position analysis system using Stockfish, built entirely in Rust.
-
-## Features
-
-- **Multi-Protocol API** - REST, gRPC, and GraphQL on separate ports
-- **HA Clustering** - Automatic node discovery and gossip-based token replication
-- **Token Authentication** - Secure API access with cluster-wide token synchronization
-- **Stockfish Integration** - Engine pool for concurrent position analysis
-- **Admin CLI** - Cluster management and token administration
+Ironfish operates as a cluster of identical nodes. Each node runs:
+1.  **API Layer:** Axum (REST/GraphQL) + Tonic (gRPC) multiplexed on port 8080.
+2.  **Cluster Service:** Handles membership, gossip, and failure detection.
+3.  **Stockfish Pool:** Manages a pool of Stockfish engine processes for analysis.
 
 ## Quick Start
 
-### Single Node
+### Prerequisites
+*   Docker & Docker Compose
+*   (Optional) Rust toolchain for local development
 
-```bash
-# Build
-cargo build --release
+### Running a Cluster
 
-# Run (requires Stockfish installed)
-STOCKFISH_PATH=/usr/local/bin/stockfish ./target/release/ironfish-server
-```
+1.  **Start the cluster:**
+    ```bash
+    docker compose up -d
+    ```
+    This spins up 3 nodes (`node1`, `node2`, `node3`).
 
-### Docker Cluster (Example 3 nodes)
+2.  **Create an Admin Token:**
+    ```bash
+    # Use the default admin key "cluster-admin-secret" defined in docker-compose.yml
+    curl -X POST http://localhost:8080/_admin/tokens \
+      -H "X-Admin-Key: cluster-admin-secret" \
+      -H "Content-Type: application/json" \
+      -d '{"name": "my-token"}'
+    ```
+    *Response:* `{"token": "iff_..."}`
 
-```bash
-# Start cluster
-docker compose up -d
+3.  **Analyze a Position:**
+    ```bash
+    curl -X POST http://localhost:8080/v1/analyze \
+      -H "Authorization: Bearer <YOUR_TOKEN>" \
+      -H "Content-Type: application/json" \
+      -d '{ 
+        "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        "depth": 15
+      }'
+    ```
 
-# Check health
-curl http://localhost:8080/v1/health
-curl http://localhost:8082/v1/health
-curl http://localhost:8084/v1/health
+### API Endpoints
 
-# Create API token
-curl -X POST -H "X-Admin-Key: cluster-admin-secret" \
-  -H "Content-Type: application/json" -d '{}' \
-  http://localhost:8080/_admin/tokens
-
-# Analyze position
-curl -X POST -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{"fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1", "depth": 15}' \
-  http://localhost:8080/v1/analyze
-```
-
-## API Endpoints
-
-### REST API (Port 8080)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/v1/analyze` | Analyze chess position |
-| POST | `/v1/bestmove` | Get best move only |
-| GET | `/v1/health` | Health check (public) |
-| GET | `/v1/metrics` | Engine metrics |
-
-### Admin API (Requires X-Admin-Key header)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/_admin/tokens` | List all tokens |
-| POST | `/_admin/tokens` | Create new token |
-| DELETE | `/_admin/tokens/:id` | Revoke token |
-| GET | `/_admin/cluster/status` | Cluster membership |
-
-### gRPC API (Port 8081)
-
-```bash
-# List services
-grpcurl -plaintext localhost:8081 list
-
-# Analyze position
-grpcurl -plaintext -H "authorization: Bearer <token>" \
-  -d '{"fen": "startpos", "depth": 10}' \
-  localhost:8081 chess.ChessAnalysis/Analyze
-```
-
-### GraphQL API (Port 8080/graphql)
-
-```graphql
-query {
-  analyze(fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1", depth: 15) {
-    bestMove { from to }
-    evaluation { scoreType value }
-  }
-}
-```
-
-## Configuration
-
-### Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `IRONFISH_NODE_ID` | auto | Node identifier |
-| `IRONFISH_BIND_ADDRESS` | 0.0.0.0:8080 | Listen address |
-| `IRONFISH_CLUSTER_PEERS` | - | Comma-separated peer list |
-| `IRONFISH_TOKEN_SECRET` | dev-secret | Shared HMAC secret for tokens |
-| `IRONFISH_ADMIN_KEY` | - | Admin API authentication key |
-| `STOCKFISH_PATH` | /usr/local/bin/stockfish | Path to Stockfish binary |
-
-### Config File (config/default.toml)
-
-```toml
-[node]
-id = "auto"
-bind_address = "0.0.0.0:8080"
-data_dir = "/var/lib/ironfish"
-
-[stockfish]
-binary_path = "/usr/bin/stockfish"
-pool_size = 4
-default_depth = 20
-
-[cluster]
-enabled = true
-heartbeat_interval_ms = 1000
-gossip_interval_ms = 5000
-
-[discovery]
-static_peers = ["node2:8080", "node3:8080"]
-multicast_enabled = true
-
-[auth]
-enabled = true
-token_ttl_days = 365
-```
-
-## Project Structure
-
-```
-ironfish/
-├── Cargo.toml                 # Workspace root
-├── Dockerfile                 # Multi-stage build
-├── docker-compose.yml         # 3-node cluster setup
-├── crates/
-│   ├── ironfish-core/         # Core types, traits, errors
-│   ├── ironfish-stockfish/    # Stockfish engine pool
-│   ├── ironfish-auth/         # Token management & middleware
-│   ├── ironfish-cluster/      # Clustering & gossip
-│   │   ├── src/
-│   │   │   ├── discovery/     # Peer discovery (static, multicast)
-│   │   │   ├── consensus/     # Raft + Bully algorithms
-│   │   │   ├── gossip.rs      # Token replication
-│   │   │   └── network.rs     # TCP transport
-│   ├── ironfish-api/          # REST, gRPC, GraphQL
-│   │   ├── proto/             # Protobuf definitions
-│   │   └── src/
-│   │       ├── rest/          # Axum handlers
-│   │       ├── grpc/          # Tonic service
-│   │       └── graphql/       # async-graphql schema
-│   ├── ironfish-cli/          # Admin CLI tool
-│   └── ironfish-server/       # Main binary
-└── config/
-    └── default.toml           # Default configuration
-```
+| Method | Path | Description | Auth |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/v1/health` | Node health status | None |
+| `GET` | `/v1/metrics` | System & Cluster metrics | Bearer |
+| `POST` | `/v1/analyze` | Analyze FEN position | Bearer |
+| `POST` | `/graphql` | GraphQL Endpoint | Bearer |
+| `POST` | `/_admin/tokens` | Create API Token | Admin Key |
+| `DELETE` | `/_admin/tokens/:id` | Revoke API Token | Admin Key |
 
 ## Development
 
+### Pre-commit Hooks
+The project includes a pre-commit hook to ensure code quality.
 ```bash
-# Run tests
-cargo test --all
-
-# Run with logging
-RUST_LOG=info cargo run -p ironfish-server
-
-# Format code
-cargo fmt --all
-
-# Lint
-cargo clippy --all -- -D warnings
+cp pre-commit .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
 ```
 
-## Cluster Features
-
-### Token Replication
-
-Tokens created on any node are automatically replicated to all cluster nodes via gossip protocol. Token revocations are also propagated cluster-wide.
-
-### Auto-Discovery
-
-Nodes discover each other using:
-1. **Static peers** - Hostname:port list (supports DNS resolution)
-2. **Multicast** - UDP discovery on local network (239.255.42.98:7878)
-
-### Shared Authentication
-
-All nodes must use the same `IRONFISH_TOKEN_SECRET` to validate tokens created by other nodes.
+### Running Tests
+```bash
+cargo test --workspace
+```
+Note: Docker integration tests run sequentially to avoid port conflicts.
 
 ## License
-
 MIT

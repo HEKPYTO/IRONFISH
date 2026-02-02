@@ -14,7 +14,7 @@ impl Default for NodeConfig {
     fn default() -> Self {
         Self {
             id: None,
-            bind_address: "0.0.0.0:8080".parse().unwrap(),
+            bind_address: "0.0.0.0:8080".parse().expect("valid default bind address"),
             priority: 100,
             version: env!("CARGO_PKG_VERSION").to_string(),
         }
