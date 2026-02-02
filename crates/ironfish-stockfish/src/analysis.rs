@@ -1,18 +1,14 @@
 use std::collections::HashMap;
 use std::sync::Arc;
-
 use chrono::Utc;
 use tokio::time::{timeout, Duration};
 use tracing::{debug, instrument};
-
 use ironfish_core::{
     AnalysisRequest, AnalysisResult, BestMoveRequest, BestMoveResponse, ChessPosition, Error,
     Evaluation, Move, PrincipalVariation, Result,
 };
-
 use crate::engine::{BestMove, UciInfo};
 use crate::pool::EnginePool;
-
 pub struct AnalysisService {
     pool: Option<Arc<EnginePool>>,
     default_depth: u8,
@@ -20,7 +16,6 @@ pub struct AnalysisService {
     analysis_timeout: Duration,
     mock_mode: bool,
 }
-
 impl AnalysisService {
     pub fn new(pool: Arc<EnginePool>) -> Self {
         Self {
@@ -31,7 +26,6 @@ impl AnalysisService {
             mock_mode: false,
         }
     }
-
     pub fn new_mock() -> Self {
         Self {
             pool: None,
@@ -41,55 +35,45 @@ impl AnalysisService {
             mock_mode: true,
         }
     }
-
     pub fn with_default_depth(mut self, depth: u8) -> Self {
         self.default_depth = depth;
         self
     }
-
     pub fn with_default_movetime(mut self, ms: u64) -> Self {
         self.default_movetime = ms;
         self
     }
-
     pub fn with_timeout(mut self, timeout: Duration) -> Self {
         self.analysis_timeout = timeout;
         self
     }
-
     #[instrument(skip(self), fields(id = %request.id))]
     pub async fn analyze(&self, request: AnalysisRequest) -> Result<AnalysisResult> {
         let position = ChessPosition::new(&request.fen);
         if !position.validate() {
             return Err(Error::InvalidFen(request.fen.clone()));
         }
-
         if self.mock_mode {
             return Ok(self.mock_analysis_result(&request));
         }
-
         let pool = self
             .pool
             .as_ref()
             .ok_or_else(|| Error::Engine("no pool".into()))?;
         let pooled = pool.acquire().await?;
         let engine = pooled.engine();
-
         engine.ensure_ready().await?;
         engine.set_multipv(request.multipv.max(1)).await?;
         engine.set_position(&request.fen).await?;
         engine.go_depth(request.depth).await?;
-
         let result = timeout(
             self.analysis_timeout,
             self.collect_analysis(&request, engine),
         )
         .await
         .map_err(|_| Error::AnalysisTimeout)??;
-
         Ok(result)
     }
-
     async fn collect_analysis(
         &self,
         request: &AnalysisRequest,
@@ -98,11 +82,9 @@ impl AnalysisService {
         let mut pvs: HashMap<u8, (UciInfo, Vec<String>)> = HashMap::new();
         let mut final_info: Option<UciInfo> = None;
         let start = std::time::Instant::now();
-
         let best = loop {
             let line = engine.read_line().await?;
             let line = line.trim();
-
             if let Some(info) = UciInfo::parse(line) {
                 let pv_idx = info.multipv.unwrap_or(1);
                 if !info.pv.is_empty() {
@@ -110,25 +92,20 @@ impl AnalysisService {
                 }
                 final_info = Some(info);
             }
-
             if let Some(bm) = BestMove::parse(line) {
                 break bm;
             }
         };
         let info = final_info.unwrap_or_default();
         let elapsed = start.elapsed();
-
         let best_move_parsed =
             Move::from_uci(&best.mv).ok_or_else(|| Error::Engine("invalid bestmove".into()))?;
-
         let ponder = best.ponder.as_ref().and_then(|p| Move::from_uci(p));
-
         let evaluation = if let Some(mate) = info.score_mate {
             Evaluation::mate(mate)
         } else {
             Evaluation::centipawns(info.score_cp.unwrap_or(0))
         };
-
         let mut principal_variations: Vec<PrincipalVariation> = pvs
             .into_iter()
             .map(|(rank, (pv_info, moves))| {
@@ -146,9 +123,7 @@ impl AnalysisService {
                 }
             })
             .collect();
-
         principal_variations.sort_by_key(|pv| pv.rank);
-
         Ok(AnalysisResult {
             id: request.id,
             fen: request.fen.clone(),
@@ -162,33 +137,26 @@ impl AnalysisService {
             completed_at: Utc::now(),
         })
     }
-
     #[instrument(skip(self))]
     pub async fn best_move(&self, request: BestMoveRequest) -> Result<BestMoveResponse> {
         let position = ChessPosition::new(&request.fen);
         if !position.validate() {
             return Err(Error::InvalidFen(request.fen.clone()));
         }
-
         if self.mock_mode {
             return Ok(self.mock_best_move_result());
         }
-
         let pool = self
             .pool
             .as_ref()
             .ok_or_else(|| Error::Engine("no pool".into()))?;
         let pooled = pool.acquire().await?;
         let engine = pooled.engine();
-
         engine.ensure_ready().await?;
         engine.set_position(&request.fen).await?;
-
         let movetime = request.movetime.unwrap_or(self.default_movetime);
         engine.go_movetime(movetime).await?;
-
         let mut best_move: Option<BestMove> = None;
-
         let result = timeout(Duration::from_millis(movetime + 5000), async {
             loop {
                 let line = engine.read_line().await?;
@@ -201,26 +169,20 @@ impl AnalysisService {
         })
         .await
         .map_err(|_| Error::AnalysisTimeout)?;
-
         result?;
-
         let best = best_move.ok_or_else(|| Error::Engine("no bestmove received".into()))?;
         let mv =
             Move::from_uci(&best.mv).ok_or_else(|| Error::Engine("invalid bestmove".into()))?;
         let ponder = best.ponder.as_ref().and_then(|p| Move::from_uci(p));
-
         debug!(best_move = %best.mv, "best move found");
-
         Ok(BestMoveResponse {
             best_move: mv,
             ponder,
         })
     }
-
     pub fn pool(&self) -> Option<&EnginePool> {
         self.pool.as_ref().map(|p| p.as_ref())
     }
-
     fn mock_analysis_result(&self, request: &AnalysisRequest) -> AnalysisResult {
         AnalysisResult {
             id: request.id,
@@ -259,7 +221,6 @@ impl AnalysisService {
             completed_at: Utc::now(),
         }
     }
-
     fn mock_best_move_result(&self) -> BestMoveResponse {
         BestMoveResponse {
             best_move: Move {

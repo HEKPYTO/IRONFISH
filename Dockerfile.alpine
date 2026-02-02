@@ -1,24 +1,17 @@
-FROM rust:1-bookworm AS builder
+FROM rust:1-alpine AS builder
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    protobuf-compiler \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache protoc musl-dev g++ make git curl
 
 COPY Cargo.toml Cargo.lock ./
 COPY crates ./crates
 
 RUN cargo build --release --bin ironfish-server --bin ironfish
 
-FROM debian:bookworm-slim AS stockfish-builder
+FROM alpine:latest AS stockfish-builder
 
-RUN apt-get update && apt-get install -y \
-    git \
-    make \
-    g++ \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache git make g++ curl
 
 ARG STOCKFISH_VERSION=sf_18
 ARG TARGETARCH
@@ -31,18 +24,13 @@ RUN git clone --depth 1 --branch ${STOCKFISH_VERSION} https://github.com/officia
     elif [ "${TARGETARCH}" = "amd64" ]; then \
         make -j$(nproc) build ARCH=x86-64; \
     else \
-        echo "Unknown architecture: ${TARGETARCH}, defaulting to x86-64"; \
         make -j$(nproc) build ARCH=x86-64; \
     fi && \
     find . -maxdepth 1 -name "stockfish*" -type f -executable -exec mv {} /usr/local/bin/stockfish \;
 
-FROM debian:bookworm-slim
+FROM alpine:latest
 
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    libstdc++6 \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache libstdc++ curl
 
 COPY --from=stockfish-builder /usr/local/bin/stockfish /usr/local/bin/stockfish
 COPY --from=builder /app/target/release/ironfish-server /usr/local/bin/

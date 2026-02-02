@@ -1,23 +1,16 @@
 mod handlers;
-
 pub use handlers::*;
-
 use std::sync::Arc;
-
 use axum::routing::{delete, get, post};
 use axum::Router;
-
 use crate::ApiState;
-
 pub struct RestRouter {
     state: Arc<ApiState>,
 }
-
 impl RestRouter {
     pub fn new(state: Arc<ApiState>) -> Self {
         Self { state }
     }
-
     pub fn build(self) -> Router {
         let api_routes = Router::new()
             .route("/analyze", post(handlers::analyze))
@@ -26,7 +19,6 @@ impl RestRouter {
             .route("/health", get(handlers::health))
             .route("/metrics", get(handlers::metrics))
             .with_state(self.state.clone());
-
         let admin_routes = Router::new()
             .route("/cluster/status", get(handlers::cluster_status))
             .route("/cluster/join", post(handlers::cluster_join))
@@ -37,7 +29,6 @@ impl RestRouter {
             )
             .route("/tokens/{id}", delete(handlers::revoke_token))
             .with_state(self.state.clone());
-
         Router::new()
             .nest("/v1", api_routes)
             .nest("/_admin", admin_routes)

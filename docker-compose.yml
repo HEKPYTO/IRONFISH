@@ -11,7 +11,6 @@ services:
       - IRONFISH_TOKEN_SECRET=${IRONFISH_TOKEN_SECRET:-shared-cluster-token-secret}
     ports:
       - "8080:8080"
-      - "8081:8081"
     networks:
       - ironfish-net
     healthcheck:
@@ -33,7 +32,6 @@ services:
       - IRONFISH_TOKEN_SECRET=${IRONFISH_TOKEN_SECRET:-shared-cluster-token-secret}
     ports:
       - "8082:8080"
-      - "8083:8081"
     networks:
       - ironfish-net
     healthcheck:
@@ -55,7 +53,6 @@ services:
       - IRONFISH_TOKEN_SECRET=${IRONFISH_TOKEN_SECRET:-shared-cluster-token-secret}
     ports:
       - "8084:8080"
-      - "8085:8081"
     networks:
       - ironfish-net
     healthcheck:

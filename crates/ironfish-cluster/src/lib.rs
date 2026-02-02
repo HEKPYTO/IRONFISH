@@ -6,7 +6,6 @@ mod load_balancer;
 mod membership;
 mod network;
 mod node;
-
 pub use cluster_service::{ClusterConfig, ClusterService};
 pub use discovery::{DiscoveryManager, StaticDiscovery};
 pub use gossip::GossipService;

@@ -1,19 +1,15 @@
 use std::sync::Arc;
-
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::Json;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-
 use ironfish_core::{
     AnalysisRequest, AnalysisResult, BestMoveRequest, BestMoveResponse, ClusterStatus,
     CreateTokenRequest, CreateTokenResponse, JoinRequest, NodeInfo, TokenMetadata, TokenStore,
 };
-
 use crate::ApiState;
-
 #[derive(Debug, Deserialize)]
 pub struct AnalyzeBody {
     pub fen: String,
@@ -23,33 +19,27 @@ pub struct AnalyzeBody {
     pub multipv: u8,
     pub movetime: Option<u64>,
 }
-
 fn default_depth() -> u8 {
     20
 }
-
 fn default_multipv() -> u8 {
     1
 }
-
 #[derive(Debug, Deserialize)]
 pub struct BestMoveBody {
     pub fen: String,
     pub movetime: Option<u64>,
 }
-
 #[derive(Debug, Serialize)]
 pub struct ErrorResponse {
     pub error: String,
 }
-
 #[derive(Debug, Serialize)]
 pub struct HealthResponse {
     pub status: String,
     pub node_id: String,
     pub version: String,
 }
-
 #[derive(Debug, Serialize)]
 pub struct MetricsResponse {
     pub cpu_usage: f32,
@@ -59,7 +49,6 @@ pub struct MetricsResponse {
     pub engines_available: u32,
     pub engines_total: u32,
 }
-
 pub async fn analyze(
     State(state): State<Arc<ApiState>>,
     Json(body): Json<AnalyzeBody>,
@@ -67,12 +56,10 @@ pub async fn analyze(
     let request = AnalysisRequest::new(&body.fen)
         .with_depth(body.depth)
         .with_multipv(body.multipv);
-
     let request = match body.movetime {
         Some(ms) => request.with_movetime(ms),
         None => request,
     };
-
     match state.analysis.analyze(request).await {
         Ok(result) => Ok(Json(result)),
         Err(e) => Err((
@@ -83,7 +70,6 @@ pub async fn analyze(
         )),
     }
 }
-
 pub async fn get_analysis(
     State(_state): State<Arc<ApiState>>,
     Path(id): Path<String>,
@@ -95,7 +81,6 @@ pub async fn get_analysis(
         }),
     ))
 }
-
 pub async fn best_move(
     State(state): State<Arc<ApiState>>,
     Json(body): Json<BestMoveBody>,
@@ -104,7 +89,6 @@ pub async fn best_move(
         fen: body.fen,
         movetime: body.movetime,
     };
-
     match state.analysis.best_move(request).await {
         Ok(result) => Ok(Json(result)),
         Err(e) => Err((
@@ -115,7 +99,6 @@ pub async fn best_move(
         )),
     }
 }
-
 pub async fn health(State(state): State<Arc<ApiState>>) -> Json<HealthResponse> {
     Json(HealthResponse {
         status: "healthy".to_string(),
@@ -123,18 +106,15 @@ pub async fn health(State(state): State<Arc<ApiState>>) -> Json<HealthResponse> 
         version: state.node.info().version.clone(),
     })
 }
-
 pub async fn health_simple() -> Json<serde_json::Value> {
     Json(serde_json::json!({"status": "healthy"}))
 }
-
 pub async fn metrics(State(state): State<Arc<ApiState>>) -> Json<MetricsResponse> {
     let (active, available, total) = state
         .analysis
         .pool()
         .map(|p| (p.active() as u32, p.available() as u32, p.size() as u32))
         .unwrap_or((0, 0, 0));
-
     Json(MetricsResponse {
         cpu_usage: 0.0,
         memory_usage: 0.0,
@@ -144,22 +124,18 @@ pub async fn metrics(State(state): State<Arc<ApiState>>) -> Json<MetricsResponse
         engines_total: total,
     })
 }
-
 pub async fn metrics_simple() -> Json<serde_json::Value> {
     Json(serde_json::json!({"status": "ok"}))
 }
-
 pub async fn cluster_status(State(state): State<Arc<ApiState>>) -> Json<ClusterStatus> {
     let status = state.membership.cluster_status().await;
     Json(status)
 }
-
 #[derive(Debug, Deserialize)]
 pub struct JoinBody {
     pub address: String,
     pub priority: Option<u32>,
 }
-
 pub async fn cluster_join(
     State(state): State<Arc<ApiState>>,
     Json(body): Json<JoinBody>,
@@ -172,7 +148,6 @@ pub async fn cluster_join(
             }),
         )
     })?;
-
     let node_info = NodeInfo {
         id: ironfish_core::NodeId::generate(),
         address: addr,
@@ -180,9 +155,7 @@ pub async fn cluster_join(
         started_at: chrono::Utc::now(),
         version: "unknown".to_string(),
     };
-
     let request = JoinRequest { node_info };
-
     match state.membership.join(request).await {
         Ok(response) => Ok(Json(response)),
         Err(e) => Err((
@@ -193,7 +166,6 @@ pub async fn cluster_join(
         )),
     }
 }
-
 pub async fn cluster_leave(
     State(state): State<Arc<ApiState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
@@ -207,7 +179,6 @@ pub async fn cluster_leave(
         )),
     }
 }
-
 pub async fn list_tokens(
     State(state): State<Arc<ApiState>>,
 ) -> Result<Json<Vec<TokenMetadata>>, (StatusCode, Json<ErrorResponse>)> {
@@ -224,14 +195,12 @@ pub async fn list_tokens(
         )),
     }
 }
-
 #[derive(Debug, Deserialize)]
 pub struct CreateTokenBody {
     pub name: Option<String>,
     pub expires_in_days: Option<u32>,
     pub rate_limit: Option<u32>,
 }
-
 pub async fn create_token(
     State(state): State<Arc<ApiState>>,
     Json(body): Json<CreateTokenBody>,
@@ -241,7 +210,6 @@ pub async fn create_token(
         expires_in_days: body.expires_in_days,
         rate_limit: body.rate_limit,
     };
-
     match state.token_manager.create(request) {
         Ok((token, response)) => match state.token_store.create(token.clone()).await {
             Ok(_) => {
@@ -263,7 +231,6 @@ pub async fn create_token(
         )),
     }
 }
-
 pub async fn revoke_token(
     State(state): State<Arc<ApiState>>,
     Path(id): Path<String>,
@@ -276,7 +243,6 @@ pub async fn revoke_token(
             }),
         )
     })?;
-
     match state.token_store.revoke(&uuid).await {
         Ok(_) => {
             state.broadcast_token_revoked(uuid);

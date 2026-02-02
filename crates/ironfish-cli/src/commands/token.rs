@@ -1,13 +1,11 @@
 use clap::Subcommand;
 use serde::Deserialize;
 use tabled::{Table, Tabled};
-
 #[derive(Subcommand)]
 pub enum TokenCommands {
     Create {
         #[arg(short, long)]
         name: Option<String>,
-
         #[arg(short, long)]
         expires_in_days: Option<u32>,
     },
@@ -17,14 +15,12 @@ pub enum TokenCommands {
     },
     List,
 }
-
 #[derive(Debug, Deserialize)]
 struct CreateTokenResponse {
     id: String,
     token: String,
     expires_at: Option<String>,
 }
-
 #[derive(Debug, Deserialize, Tabled)]
 struct TokenInfo {
     #[tabled(rename = "ID")]
@@ -38,14 +34,11 @@ struct TokenInfo {
     #[tabled(rename = "Revoked")]
     revoked: bool,
 }
-
 fn display_option(o: &Option<String>) -> String {
     o.clone().unwrap_or_else(|| "-".to_string())
 }
-
 pub async fn execute(command: TokenCommands, endpoint: &str) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
-
     match command {
         TokenCommands::Create {
             name,
@@ -56,9 +49,7 @@ pub async fn execute(command: TokenCommands, endpoint: &str) -> anyhow::Result<(
                 "name": name,
                 "expires_in_days": expires_in_days,
             });
-
             let response = client.post(&url).json(&body).send().await?;
-
             if response.status().is_success() {
                 let token: CreateTokenResponse = response.json().await?;
                 println!("Token created successfully!");
@@ -75,12 +66,9 @@ pub async fn execute(command: TokenCommands, endpoint: &str) -> anyhow::Result<(
                 println!("Failed to create token: {}", error);
             }
         }
-
         TokenCommands::Revoke { id } => {
             let url = format!("{}/_admin/tokens/{}", endpoint, id);
-
             let response = client.delete(&url).send().await?;
-
             if response.status().is_success() {
                 println!("Token {} revoked successfully", id);
             } else {
@@ -88,13 +76,10 @@ pub async fn execute(command: TokenCommands, endpoint: &str) -> anyhow::Result<(
                 println!("Failed to revoke token: {}", error);
             }
         }
-
         TokenCommands::List => {
             let url = format!("{}/_admin/tokens", endpoint);
-
             let response = client.get(&url).send().await?;
             let tokens: Vec<TokenInfo> = response.json().await?;
-
             if tokens.is_empty() {
                 println!("No tokens found");
             } else {
@@ -103,6 +88,5 @@ pub async fn execute(command: TokenCommands, endpoint: &str) -> anyhow::Result<(
             }
         }
     }
-
     Ok(())
 }
