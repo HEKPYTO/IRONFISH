@@ -1,5 +1,21 @@
 # Ironfish
 
+<div align="left">
+
+[![Status](https://img.shields.io/badge/Status-Active-success?style=flat-square)]()
+[![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange?style=flat-square&logo=rust)](https://www.rust-lang.org)
+[![Docker](https://img.shields.io/badge/Docker-Supported-2496ED?style=flat-square&logo=docker)]()
+[![Protocol](https://img.shields.io/badge/Protocol-REST%20%7C%20gRPC%20%7C%20GraphQL-purple?style=flat-square)]()
+[![CI](https://img.shields.io/github/actions/workflow/status/HEKPYTO/IRONFISH/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/HEKPYTO/IRONFISH/actions/workflows/ci.yml)
+[![Security](https://img.shields.io/github/actions/workflow/status/HEKPYTO/IRONFISH/security.yml?branch=main&label=Security&style=flat-square)](https://github.com/HEKPYTO/IRONFISH/actions/workflows/security.yml)
+
+</div>
+
+<div align="center">
+  <img src="assets/logo.png" alt="Ironfish Logo" width="256" />
+</div>
+
+
 Ironfish is a **fault-tolerant, distributed chess analysis engine** built with Rust. It leverages **Stockfish**, **Docker**, and **Gossip protocols** to create a resilient, scalable, and self-healing cluster for chess position analysis.
 
 ## Key Features
@@ -48,7 +64,7 @@ Ironfish operates as a cluster of identical nodes. Each node runs:
     curl -X POST http://localhost:8080/v1/analyze \
       -H "Authorization: Bearer <YOUR_TOKEN>" \
       -H "Content-Type: application/json" \
-      -d '{ 
+      -d '{
         "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
         "depth": 15
       }'
@@ -81,4 +97,4 @@ cargo test --workspace
 Note: Docker integration tests run sequentially to avoid port conflicts.
 
 ## License
-MIT
+[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
