@@ -59,6 +59,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y stockfish
       - name: Run tests
         run: cargo test --all --all-features
+      - name: Dump Docker Logs on Failure
+        if: failure()
+        run: docker compose logs
       - name: Run doc tests
         run: cargo test --doc
 

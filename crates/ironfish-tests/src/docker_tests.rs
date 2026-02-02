@@ -41,6 +41,9 @@ async fn test_cluster_analysis_distribution() {
         .send()
         .await
         .expect("create token");
+    if token_resp.status() != 200 {
+        panic!("create token failed: {:?}", token_resp.text().await);
+    }
     let token_data: serde_json::Value = token_resp.json().await.expect("json");
     let token = token_data["token"].as_str().expect("token string");
     let analysis_body = json!({
@@ -123,6 +126,10 @@ async fn test_cluster_graphql_across_nodes() {
         .send()
         .await
         .expect("create token");
+
+    if token_resp.status() != 200 {
+        panic!("create token failed: {:?}", token_resp.text().await);
+    }
 
     let token_data: serde_json::Value = token_resp.json().await.expect("json");
     let token = token_data["token"].as_str().expect("token string");
