@@ -150,7 +150,6 @@ impl DockerCluster {
             args.push(s);
         }
 
-        // Cleanup potential leftovers from previous runs (e.g. if panic happened before Drop)
         let _ = std::process::Command::new("docker")
             .args(["compose", "down", "-v"])
             .current_dir(env!("CARGO_MANIFEST_DIR").replace("/crates/ironfish-tests", ""))

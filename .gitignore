@@ -31,3 +31,4 @@ Thumbs.db
 docs/audit/
 /*.sh
 /.txt.git/hooks/pre-commit
+/*.txt
