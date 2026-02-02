@@ -40,7 +40,7 @@ Ironfish operates on a peer-to-peer architecture using a **Gossip Protocol** for
 ---
 
 
-## 🚀 Getting Started
+## Getting Started
 
 You can run Ironfish in two modes: **Single Node** (Standalone) or **Cluster Mode**.
 
@@ -78,7 +78,7 @@ Ideal for high-availability and parallel processing.
 ---
 
 
-## 🔑 Authentication & Usage
+## Authentication & Usage
 
 Ironfish is secure by default. You need an **Admin Key** to manage tokens and an **API Token** to perform analysis.
 
@@ -117,7 +117,7 @@ curl -X POST http://localhost:8080/v1/analyze \
 ---
 
 
-## 📚 API Reference
+## API Reference
 
 | Method | Endpoint | Description | Auth Required |
 | :--- | :--- | :--- | :--- |
@@ -131,7 +131,7 @@ curl -X POST http://localhost:8080/v1/analyze \
 ---
 
 
-## 🛠️ Development
+## Development
 
 ### Pre-commit Hooks
 We use `husky` to ensure code quality. The pre-commit hook runs `cargo fmt` and `cargo clippy` automatically.
