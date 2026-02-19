@@ -1,3 +1,4 @@
+use ironfish_api::WebSocketConfig;
 use serde::Deserialize;
 use std::net::SocketAddr;
 use std::path::PathBuf;
@@ -16,6 +17,8 @@ pub struct Config {
     pub auth: AuthConfig,
     #[serde(default)]
     pub load_balancer: LoadBalancerConfig,
+    #[serde(default)]
+    pub websocket: WebSocketConfig,
 }
 #[derive(Debug, Clone, Deserialize)]
 pub struct NodeConfig {

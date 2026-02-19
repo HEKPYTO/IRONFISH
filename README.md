@@ -6,9 +6,8 @@
 [![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange?style=flat-square&logo=rust)](https://www.rust-lang.org)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Supported-2496ED?style=flat-square&logo=docker)]()
-[![Protocol](https://img.shields.io/badge/Protocol-REST%20%7C%20gRPC%20%7C%20GraphQL-purple?style=flat-square)]()
+[![Protocol](https://img.shields.io/badge/Protocol-REST%20%7C%20gRPC%20%7C%20GraphQL%20%7C%20WebSocket-purple?style=flat-square)]()
 [![CI](https://img.shields.io/github/actions/workflow/status/HEKPYTO/IRONFISH/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/HEKPYTO/IRONFISH/actions/workflows/ci.yml)
-[![Security](https://img.shields.io/github/actions/workflow/status/HEKPYTO/IRONFISH/security.yml?branch=main&label=Security&style=flat-square)](https://github.com/HEKPYTO/IRONFISH/actions/workflows/security.yml)
 
 </div>
 
@@ -121,12 +120,14 @@ curl -X POST http://localhost:8080/v1/analyze \
 
 | Method | Endpoint | Description | Auth Required |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/v1/health` | Check node health status | ❌ No |
-| `GET` | `/v1/metrics` | Real-time system & cluster metrics | ✅ Bearer Token |
-| `POST` | `/v1/analyze` | Submit analysis job (JSON) | ✅ Bearer Token |
-| `POST` | `/graphql` | GraphQL Query/Mutation endpoint | ✅ Bearer Token |
-| `POST` | `/_admin/tokens` | Create a new API token | 🔑 Admin Key |
-| `DELETE` | `/_admin/tokens/:id` | Revoke an existing token | 🔑 Admin Key |
+| `GET` | `/v1/health` | Check node health status |  No |
+| `GET` | `/v1/metrics` | Real-time system & cluster metrics |  Bearer Token |
+| `POST` | `/v1/analyze` | Submit analysis job (JSON) |  Bearer Token |
+| `POST` | `/v1/bestmove` | Submit fast best move job (JSON) |  Bearer Token |
+| `WS` | `/v1/ws` | WebSocket connection for real-time analysis |  Bearer Token |
+| `POST` | `/graphql` | GraphQL Query/Mutation endpoint |  Bearer Token |
+| `POST` | `/_admin/tokens` | Create a new API token |  Admin Key |
+| `DELETE` | `/_admin/tokens/:id` | Revoke an existing token |  Admin Key |
 
 ---
 

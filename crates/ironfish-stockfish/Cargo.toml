@@ -13,3 +13,5 @@ thiserror = { workspace = true }
 async-trait = { workspace = true }
 futures = { workspace = true }
 chrono = { workspace = true }
+uuid = { workspace = true }
+tokio-util = { workspace = true }

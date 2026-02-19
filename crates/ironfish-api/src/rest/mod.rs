@@ -1,4 +1,5 @@
 mod handlers;
+use crate::ws;
 use crate::ApiState;
 use axum::routing::{delete, get, post};
 use axum::Router;
@@ -18,6 +19,7 @@ impl RestRouter {
             .route("/bestmove", post(handlers::best_move))
             .route("/health", get(handlers::health))
             .route("/metrics", get(handlers::metrics))
+            .route("/ws", get(ws::ws_handler))
             .with_state(self.state.clone());
         let admin_routes = Router::new()
             .route("/cluster/status", get(handlers::cluster_status))

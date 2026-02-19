@@ -9,6 +9,8 @@ pub enum Error {
     PoolExhausted,
     #[error("analysis timeout")]
     AnalysisTimeout,
+    #[error("analysis cancelled")]
+    AnalysisCancelled,
     #[error("invalid token")]
     InvalidToken,
     #[error("token expired")]

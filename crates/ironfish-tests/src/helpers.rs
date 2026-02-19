@@ -1,4 +1,5 @@
-use ironfish_api::{ApiRouter, ApiState};
+use ironfish_api::ws::SessionManager;
+use ironfish_api::{ApiRouter, ApiState, WebSocketConfig};
 use ironfish_auth::{SledTokenStore, TokenManager};
 use ironfish_cluster::{MembershipManager, Node, NodeConfig};
 use ironfish_core::TokenStore;
@@ -50,12 +51,16 @@ impl TestServer {
         let secret = TokenManager::generate_secret();
         let token_manager = Arc::new(TokenManager::new(&secret, "test"));
         let membership = Arc::new(MembershipManager::new(node.clone()));
+        let ws_config = WebSocketConfig::default();
+        let ws_sessions = Arc::new(SessionManager::new(ws_config.max_connections));
         let state = Arc::new(ApiState::new(
             analysis,
             token_store.clone(),
             token_manager.clone(),
             node,
             membership,
+            ws_sessions,
+            ws_config,
         ));
         let router = ApiRouter::new(state.clone())
             .with_auth(enable_auth)
@@ -82,6 +87,35 @@ impl TestServer {
     }
     pub fn url(&self, path: &str) -> String {
         format!("http://{}{}", self.addr, path)
+    }
+    pub fn ws_url(&self, token: Option<&str>) -> String {
+        match token {
+            Some(t) => format!("ws://{}/v1/ws?token={}", self.addr, t),
+            None => format!("ws://{}/v1/ws", self.addr),
+        }
+    }
+    pub async fn ws_connect(
+        &self,
+        token: Option<&str>,
+    ) -> (
+        futures_util::stream::SplitSink<
+            tokio_tungstenite::WebSocketStream<
+                tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>,
+            >,
+            tokio_tungstenite::tungstenite::Message,
+        >,
+        futures_util::stream::SplitStream<
+            tokio_tungstenite::WebSocketStream<
+                tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>,
+            >,
+        >,
+    ) {
+        use futures_util::StreamExt;
+        let url = self.ws_url(token);
+        let (ws_stream, _) = tokio_tungstenite::connect_async(&url)
+            .await
+            .expect("ws connect");
+        ws_stream.split()
     }
     pub async fn get(&self, path: &str) -> reqwest::Response {
         reqwest::Client::new()

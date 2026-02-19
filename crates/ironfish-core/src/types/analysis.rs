@@ -85,6 +85,8 @@ pub struct AnalysisProgress {
     pub current_move: Option<Move>,
     pub nodes_per_second: u64,
     pub hash_full: u16,
+    pub evaluation: Option<Evaluation>,
+    pub principal_variations: Vec<PrincipalVariation>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BestMoveRequest {

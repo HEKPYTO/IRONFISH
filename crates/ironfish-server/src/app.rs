@@ -1,5 +1,6 @@
 use crate::config::Config;
 use chrono::Utc;
+use ironfish_api::ws::SessionManager;
 use ironfish_api::{ApiRouter, ApiState};
 use ironfish_auth::SledTokenStore;
 use ironfish_auth::TokenManager;
@@ -53,6 +54,7 @@ impl Application {
         );
         let membership = Arc::new(MembershipManager::new(node.clone()));
         let (gossip_tx, _) = broadcast::channel::<GossipMessage>(1024);
+        let ws_sessions = Arc::new(SessionManager::new(config.websocket.max_connections));
         let state = Arc::new(
             ApiState::new(
                 analysis,
@@ -60,6 +62,8 @@ impl Application {
                 token_manager,
                 node.clone(),
                 membership.clone(),
+                ws_sessions,
+                config.websocket.clone(),
             )
             .with_gossip(gossip_tx.clone()),
         );

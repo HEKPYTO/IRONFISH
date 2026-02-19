@@ -1,19 +1,43 @@
 use crate::graphql::GraphQLService;
 use crate::grpc::GrpcService;
 use crate::rest::RestRouter;
+use crate::ws;
 use axum::Router;
-use http_body_util::BodyExt;
 use ironfish_auth::{AuthLayer, SledTokenStore, TokenManager};
 use ironfish_cluster::{MembershipManager, Node};
 use ironfish_core::{ApiToken, GossipMessage};
 use ironfish_stockfish::AnalysisService;
 use std::sync::Arc;
 use tokio::sync::broadcast;
-use tower::{Service, ServiceBuilder};
+use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 pub type GossipBroadcaster = broadcast::Sender<GossipMessage>;
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct WebSocketConfig {
+    pub enabled: bool,
+    pub max_connections: usize,
+    pub auth_timeout_secs: u64,
+    pub ping_interval_secs: u64,
+    pub max_message_size_bytes: usize,
+    pub max_analyses_per_session: usize,
+}
+
+impl Default for WebSocketConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            max_connections: 256,
+            auth_timeout_secs: 5,
+            ping_interval_secs: 30,
+            max_message_size_bytes: 65536,
+            max_analyses_per_session: 4,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct ApiState {
     pub analysis: Arc<AnalysisService>,
@@ -22,6 +46,8 @@ pub struct ApiState {
     pub node: Arc<Node>,
     pub membership: Arc<MembershipManager>,
     pub gossip_tx: Option<GossipBroadcaster>,
+    pub ws_sessions: Arc<ws::SessionManager>,
+    pub ws_config: Arc<WebSocketConfig>,
 }
 impl ApiState {
     pub fn new(
@@ -30,6 +56,8 @@ impl ApiState {
         token_manager: Arc<TokenManager>,
         node: Arc<Node>,
         membership: Arc<MembershipManager>,
+        ws_sessions: Arc<ws::SessionManager>,
+        ws_config: WebSocketConfig,
     ) -> Self {
         Self {
             analysis,
@@ -38,6 +66,8 @@ impl ApiState {
             node,
             membership,
             gossip_tx: None,
+            ws_sessions,
+            ws_config: Arc::new(ws_config),
         }
     }
     pub fn with_gossip(mut self, tx: GossipBroadcaster) -> Self {
@@ -102,14 +132,13 @@ impl ApiRouter {
             )
         }
     }
-    pub fn build_grpc_router(&self) -> tonic::transport::server::Router {
+    pub fn build_grpc_routes(&self) -> tonic::service::Routes {
         let grpc_service = GrpcService::new(self.state.clone());
         let reflection_service = tonic_reflection::server::Builder::configure()
             .register_encoded_file_descriptor_set(crate::proto::FILE_DESCRIPTOR_SET)
             .build_v1()
             .expect("reflection service");
-        tonic::transport::Server::builder()
-            .add_service(reflection_service)
+        tonic::service::Routes::new(reflection_service)
             .add_service(grpc_service.chess_server())
             .add_service(grpc_service.admin_server())
     }
@@ -122,32 +151,7 @@ impl ApiRouter {
         Future = impl Send,
     > + Clone {
         let rest = self.clone().build_rest_router();
-        let grpc = self.build_grpc_router().into_service();
-        tower::service_fn(move |req: axum::http::Request<axum::body::Body>| {
-            let mut rest = rest.clone();
-            let mut grpc = grpc.clone();
-            async move {
-                let is_grpc = req
-                    .headers()
-                    .get(axum::http::header::CONTENT_TYPE)
-                    .map(|v| v.as_bytes().starts_with(b"application/grpc"))
-                    .unwrap_or(false);
-                if is_grpc {
-                    let req = req.map(|b| {
-                        b.map_err(|e| tonic::Status::unknown(e.to_string()))
-                            .boxed_unsync()
-                    });
-                    match grpc.call(req).await {
-                        Ok(res) => Ok(res.map(axum::body::Body::new)),
-                        Err(_e) => Ok(axum::http::Response::builder()
-                            .status(500)
-                            .body(axum::body::Body::empty())
-                            .unwrap()),
-                    }
-                } else {
-                    rest.call(req).await
-                }
-            }
-        })
+        let grpc = self.build_grpc_routes().into_axum_router();
+        rest.fallback_service(grpc).into_service()
     }
 }

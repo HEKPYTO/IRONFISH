@@ -83,6 +83,8 @@ where
         let is_public_path = path == "/v1/health"
             || path == "/health"
             || path == "/metrics"
+            || path == "/v1/ws"
+            || path == "/ws"
             || (path == "/graphql" && method == Method::GET);
         let is_admin_path = path.starts_with("/_admin");
         if !self.enabled {

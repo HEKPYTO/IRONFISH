@@ -19,68 +19,57 @@ license = "MIT"
 repository = "https://github.com/ironfish/ironfish"
 
 [workspace.dependencies]
-# Async runtime
-tokio = { version = "1.35", features = ["full"] }
+tokio = { version = "1.49", features = ["full"] }
+tokio-util = { version = "0.7", features = ["rt"] }
 
-# HTTP/API
-axum = { version = "0.8", features = ["macros"] }
-tower = { version = "0.5", features = ["full"] }
-tower-http = { version = "0.6", features = ["cors", "trace", "compression-gzip"] }
-hyper = { version = "1.1", features = ["full"] }
+axum = { version = "0.8.6", features = ["macros", "ws"] }
+tower = { version = "0.5.3", features = ["full"] }
+tower-http = { version = "0.6.8", features = ["cors", "trace", "compression-gzip"] }
+hyper = { version = "1.7", features = ["full"] }
 hyper-util = { version = "0.1", features = ["full"] }
 
-# gRPC
-tonic = { version = "0.12", features = ["gzip"] }
-tonic-build = "0.12"
-tonic-reflection = "0.12"
-prost = "0.13"
-prost-types = "0.13"
+tonic = { version = "0.14.3", features = ["gzip"] }
+tonic-prost = "0.14.3"
+tonic-prost-build = "0.14.3"
+tonic-reflection = "0.14.2"
+prost = "0.14.3"
+prost-types = "0.14.3"
 
-# GraphQL
-async-graphql = { version = "7.0", features = ["chrono", "uuid"] }
-async-graphql-axum = "7.0"
+async-graphql = { version = "7.2", features = ["chrono", "uuid"] }
+async-graphql-axum = "7.2"
 
-# Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 toml = "0.8"
 
-# Configuration
 config = "0.14"
 
-# CLI
 clap = { version = "4.4", features = ["derive", "env"] }
 
-# Logging & Metrics
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 metrics = "0.22"
 metrics-exporter-prometheus = "0.13"
 
-# Crypto
 ring = "0.17"
-base64 = "0.21"
+base64 = "0.22"
 
-# Storage
-sled = "0.34"
+sled = "0.34.7"
 
-# Networking
 socket2 = { version = "0.5", features = ["all"] }
 
-# UUID & Time
 uuid = { version = "1.6", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 
-# Error handling
-thiserror = "1.0"
+thiserror = "2.0"
 anyhow = "1.0"
 
-# Async utilities
 futures = "0.3"
+futures-util = "0.3"
 async-trait = "0.1"
 tokio-stream = { version = "0.1", features = ["sync"] }
+tokio-tungstenite = "0.28"
 
-# Internal crates
 ironfish-core = { path = "crates/ironfish-core" }
 ironfish-stockfish = { path = "crates/ironfish-stockfish" }
 ironfish-auth = { path = "crates/ironfish-auth" }
