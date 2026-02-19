@@ -1,0 +1,76 @@
+services:
+  node1:
+    build:
+      context: .
+      dockerfile: Dockerfile.alpine
+    container_name: ironfish-node1
+    environment:
+      - RUST_LOG=ironfish=info,ironfish_cluster=debug
+      - IRONFISH_CLUSTER_ENABLED=true
+      - IRONFISH_CLUSTER_ID=node1
+      - IRONFISH_CLUSTER_PEERS=node1:8081,node2:8081,node3:8081
+      - IRONFISH_ADMIN_KEY=cluster-admin-secret
+      - IRONFISH_TOKEN_SECRET=cluster-admin-secret-which-must-be-long-enough-32-chars
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    networks:
+      - ironfish-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  node2:
+    build:
+      context: .
+      dockerfile: Dockerfile.alpine
+    container_name: ironfish-node2
+    environment:
+      - RUST_LOG=ironfish=info,ironfish_cluster=debug
+      - IRONFISH_CLUSTER_ENABLED=true
+      - IRONFISH_CLUSTER_ID=node2
+      - IRONFISH_CLUSTER_PEERS=node1:8081,node2:8081,node3:8081
+      - IRONFISH_ADMIN_KEY=cluster-admin-secret
+      - IRONFISH_TOKEN_SECRET=cluster-admin-secret-which-must-be-long-enough-32-chars
+    ports:
+      - "8082:8080"
+      - "8083:8081"
+    networks:
+      - ironfish-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  node3:
+    build:
+      context: .
+      dockerfile: Dockerfile.alpine
+    container_name: ironfish-node3
+    environment:
+      - RUST_LOG=ironfish=info,ironfish_cluster=debug
+      - IRONFISH_CLUSTER_ENABLED=true
+      - IRONFISH_CLUSTER_ID=node3
+      - IRONFISH_CLUSTER_PEERS=node1:8081,node2:8081,node3:8081
+      - IRONFISH_ADMIN_KEY=cluster-admin-secret
+      - IRONFISH_TOKEN_SECRET=cluster-admin-secret-which-must-be-long-enough-32-chars
+    ports:
+      - "8084:8080"
+      - "8085:8081"
+    networks:
+      - ironfish-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+networks:
+  ironfish-net:
+    driver: bridge
